@@ -1,0 +1,14 @@
+# Disable directory browsing entirely
+Options -Indexes
+
+# Block direct access to sensitive file types
+<FilesMatch "\.(sql|md|log|ini|env|bak|config|json|lock)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block .htaccess and backup files
+<FilesMatch "^(\.htaccess|\.htpasswd|\.git|.*~)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
