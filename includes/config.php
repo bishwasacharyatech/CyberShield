@@ -3,7 +3,7 @@ define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'cybershield');
-define('BASE_URL', '/CYBERSHIELD_MID');
+define('BASE_URL', '/CYBERSHIELD');
 
  function getDB() {
     static $c = null;
