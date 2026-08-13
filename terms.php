@@ -1,10 +1,8 @@
 <?php
 require_once 'includes/config.php';
 ?>
-```
-And change the stylesheet line to:
-```php
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/style.css">
+
+    
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +10,7 @@ And change the stylesheet line to:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms and Conditions — CyberShield</title>
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/style.css">
     <style>
         .terms-header {
             background: var(--bg3);
