@@ -1,3 +1,11 @@
+<?php
+require_once 'includes/config.php';
+?>
+```
+And change the stylesheet line to:
+```php
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/style.css">
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
