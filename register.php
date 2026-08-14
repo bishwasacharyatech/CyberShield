@@ -43,8 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare('INSERT INTO users (full_name, email, username, password, phone, role) VALUES (?, ?, ?, ?, ?, ?)');
             $stmt->bind_param('ssssss', $name, $email, $uname, $hash, $phone, $role);
 
-            if ($stmt->execute()) {
-                $success = 'Account created and saved to the database. Login page arrives Day 3.';
+           if ($stmt->execute()) {
+                header('Location: ' . BASE_URL . '/login.php');
+                exit;
             } else {
                 $err = 'Registration failed due to a system error. Please try again.';
             }
