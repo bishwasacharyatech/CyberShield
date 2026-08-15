@@ -1,7 +1,9 @@
 <?php
 require_once '../includes/config.php';
+requireAuth('user');
 require_once '../includes/layout.php';
 
+auditLog('VIEW', 'Dashboard', 'Viewed user dashboard');
 
 $total = 0;
 $pending = 0;
@@ -13,7 +15,7 @@ pageStart('Dashboard', 'user');
 sidebar('user', 'dashboard');
 ?>
 
-<div class="pg-title">Welcome!</div>
+<div class="pg-title">Welcome, <?= e($_SESSION['fname']) ?>!</div>
 <div class="pg-sub">Cybersecurity Incident Management System</div>
 
 <div class="grid g4">
