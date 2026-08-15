@@ -1,5 +1,3 @@
-DirectoryIndex landing.php
-
 # Disable directory browsing entirely
 Options -Indexes
 
