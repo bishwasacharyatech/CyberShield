@@ -1,9 +1,10 @@
 <?php
 
-function pageStart($title, $role) {
-    $rc = \['admin' => '#e0333f', 'analyst' => '#7c6ff2', 'user' => '#3b6fe8']\[$role] ?? '#3b6fe8';
-    $fn = e($\_SESSION\['fname'] ?? '');
-    $base = BASE\_URL;
+function pageStart($title, $role)
+{
+    $rc = ['admin' => '#e0333f', 'analyst' => '#7c6ff2', 'user' => '#3b6fe8'][$role] ?? '#3b6fe8';
+    $fn = e($_SESSION['fname'] ?? '');
+    $base = BASE_URL;
     $escTitle = e($title);
 
     echo '<!DOCTYPE html>
@@ -13,14 +14,14 @@ function pageStart($title, $role) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>' . $escTitle . ' — CyberShield</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-    <link rel="stylesheet" href="' . BASE\_URL . '/assets/style.css">
+    <link rel="stylesheet" href="' . BASE_URL . '/assets/style.css">
     <style>
         :root { --rc: ' . $rc . '; }
     </style>
 </head>
 <body>
     <div class="topbar">
-        <button class="hamb" id="hambBtn" onclick="document.getElementById(\\'sbEl\\').classList.toggle(\\'open\\');document.getElementById(\\'ovEl\\').classList.toggle(\\'show\\')">☰</button>
+        <button class="hamb" id="hambBtn" onclick="document.getElementById(\'sbEl\').classList.toggle(\'open\');document.getElementById(\'ovEl\').classList.toggle(\'show\')">☰</button>
         <div class="logo"><span class="c-cyber">Cyber</span><span class="c-shield">Shield</span></div>
         <span class="rpill">' . $role . '</span>
         <span class="dot" style="margin-left:4px"></span>
@@ -29,28 +30,29 @@ function pageStart($title, $role) {
             <a href="' . $base . '/logout.php" class="btn btn-gy btn-sm"><i class="ti ti-logout"></i> Logout</a>
         </div>
     </div>
-    <div class="overlay" id="ovEl" onclick="document.getElementById(\\'sbEl\\').classList.remove(\\'open\\');this.classList.remove(\\'show\\')"></div>
+    <div class="overlay" id="ovEl" onclick="document.getElementById(\'sbEl\').classList.remove(\'open\');this.classList.remove(\'show\')"></div>
     <div class="wrap">';
 }
 
-function sidebar($role, $active = '') {
-    $base = BASE\_URL;
-    $links = \[
-        'user' => \[
-            \['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+function sidebar($role, $active = '')
+{
+    $base = BASE_URL;
+    $links = [
+        'user' => [
+            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
         ],
     ];
 
     echo '<div class="sidebar" id="sbEl">
         <div class="sb-sec">// Menu</div>';
 
-    foreach ($links\[$role] ?? \[] as $link) {
-        \[$page, $label, $icon] = $link;
+    foreach ($links[$role] ?? [] as $link) {
+        [$page, $label, $icon] = $link;
         $href = $base . '/' . $role . '/' . $page . '.php';
         $activeClass = ($active === $page) ? ' active' : '';
         echo '<a href="' . $href . '" class="sb-a' . $activeClass . '">
             <i class="ti ' . $icon . '"></i> ' . $label .
-        '</a>';
+            '</a>';
     }
 
     echo '<div class="sb-bot">
@@ -60,6 +62,7 @@ function sidebar($role, $active = '') {
     <div class="content">';
 }
 
-function pageEnd() {
+function pageEnd()
+{
     echo '</div></div></body></html>';
 }

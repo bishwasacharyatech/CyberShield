@@ -15,6 +15,21 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+-- 2. AUDIT LOGS
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    username VARCHAR(50) DEFAULT 'guest',
+    role VARCHAR(20) DEFAULT 'unknown',
+    action VARCHAR(100) NOT NULL,
+    module VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(255) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- defULT DATA
 -- Admin account (password: admin123)
 INSERT IGNORE INTO users (full_name, email, username, password, role, status)

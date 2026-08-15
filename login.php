@@ -1,8 +1,15 @@
 <?php
 require_once 'includes/config.php';
 
+if (!empty($_SESSION['uid'])) {
+    header('Location: ' . BASE_URL . '/' . $_SESSION['role'] . '/dashboard.php');
+    exit;
+}
+
 $err = '';
-$success = '';
+if (isset($_GET['timeout'])) {
+    $err = 'Session expired. Please login again.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $un = trim($_POST['username'] ?? '');
@@ -18,7 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->get_result()->fetch_assoc();
 
         if ($user && password_verify($pw, $user['password']) && $user['status'] === 'active') {
-            $success = "Login successful! Welcome, {$user['full_name']} ({$user['role']}). Dashboard arrives Day 4.";
+            $_SESSION['uid']   = $user['id'];
+            $_SESSION['uname'] = $user['username'];
+            $_SESSION['fname'] = $user['full_name'];
+            $_SESSION['role']  = $user['role'];
+
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0';
+            auditLog('LOGIN', 'Auth', "Successful login from {$ip}");
+
+            header('Location: ' . BASE_URL . '/' . $user['role'] . '/dashboard.php');
+            exit;
         } else {
             $err = 'Invalid username or password.';
         }
@@ -44,12 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </a>
         <div class="brand-subtitle">Authorized Personnel Only</div>
     </header>
-
-    <?php if ($success): ?>
-        <div style="background:rgba(63,185,80,.1);border:1px solid #3fb950;color:#3fb950;padding:0.75rem;border-radius:6px;font-size:0.85rem;margin-bottom:1.25rem;line-height:1.4;">
-            <?= e($success) ?>
-        </div>
-    <?php endif; ?>
 
     <?php if ($err): ?>
         <div class="alert-error">
@@ -81,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <hr class="divider">
 
     <footer class="auth-footer">
-    <a href="<?= BASE_URL ?>/register.php">Create an account</a>
+        New here? <a href="<?= BASE_URL ?>/register.php">Create an account</a>
     </footer>
 </main>
 
