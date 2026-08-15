@@ -1,5 +1,11 @@
 <?php
 require_once 'includes/config.php';
+
+// Redirect if already logged in
+if (!empty($_SESSION['uid'])) {
+    header('Location: ' . BASE_URL . '/' . $_SESSION['role'] . '/dashboard.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
