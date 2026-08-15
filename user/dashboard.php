@@ -1,13 +1,13 @@
 <?php
-require\_once '../includes/config.php';
-require\_once '../includes/layout.php';
+require_once '../includes/config.php';
+require_once '../includes/layout.php';
 
 // Placeholder values for design preview — Bishwas wires real queries once the reports table exists (Day 5)
 $total = 0;
 $pending = 0;
 $inProgress = 0;
 $resolved = 0;
-$reports = \[];
+$reports = [];
 
 pageStart('Dashboard', 'user');
 sidebar('user', 'dashboard');
@@ -38,7 +38,7 @@ sidebar('user', 'dashboard');
 <div class="card">
     <div class="ch">
         <span class="ct"><i class="ti ti-file-text"></i> My Recent Reports</span>
-        <a href="<?= BASE\_URL ?>/user/report.php" class="btn btn-cy btn-sm"><i class="ti ti-plus"></i> New Report</a>
+        <a href="<?= BASE_URL ?>/user/report.php" class="btn btn-cy btn-sm"><i class="ti ti-plus"></i> New Report</a>
     </div>
     <?php if ($reports): ?>
         <div class="tw">
@@ -55,7 +55,7 @@ sidebar('user', 'dashboard');
     <?php else: ?>
         <div style="text-align:center;padding:40px;color:var(--mu)">
             <div style="font-size:40px;margin-bottom:10px">📋</div>
-            <p>No reports yet. <a href="<?= BASE\_URL ?>/user/report.php">Submit your first complaint →</a></p>
+            <p>No reports yet. <a href="<?= BASE_URL ?>/user/report.php">Submit your first complaint →</a></p>
         </div>
     <?php endif; ?>
 </div>
