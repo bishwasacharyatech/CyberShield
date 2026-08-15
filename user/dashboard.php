@@ -2,7 +2,7 @@
 require_once '../includes/config.php';
 require_once '../includes/layout.php';
 
-// Placeholder values for design preview — Bishwas wires real queries once the reports table exists (Day 5)
+
 $total = 0;
 $pending = 0;
 $inProgress = 0;
