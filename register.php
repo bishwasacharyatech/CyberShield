@@ -1,5 +1,10 @@
 <?php
 require_once 'includes/config.php';
+if (!empty($_SESSION['uid'])) {
+    header('Location:' . BASE_URL . '/' . $_SESSION['role'] . '/dashboard.php');
+    exit;
+}
+
 
 $err = '';
 $success = '';
@@ -43,8 +48,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare('INSERT INTO users (full_name, email, username, password, phone, role) VALUES (?, ?, ?, ?, ?, ?)');
             $stmt->bind_param('ssssss', $name, $email, $uname, $hash, $phone, $role);
 
-           if ($stmt->execute()) {
-                header('Location: ' . BASE_URL . '/login.php');
+            // Auto-login after registration ---
+            if ($stmt->execute()) {
+                session_regenerate_id(true);
+
+                $_SESSION['uid']   = $db->insert_id;
+                $_SESSION['uname'] = $uname;
+                $_SESSION['fname'] = $name;
+                $_SESSION['role']  = $role;
+
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '0';
+                auditLog('REGISTER', 'Auth', "New {$role} registered: {$uname} from {$ip}");
+
+                header('Location:' . BASE_URL . "/{$role}/dashboard.php");
                 exit;
             } else {
                 $err = 'Registration failed due to a system error. Please try again.';
