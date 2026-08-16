@@ -30,6 +30,62 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 3. CATEGORIES
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. REPORTS
+CREATE TABLE IF NOT EXISTS reports (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_no VARCHAR(20) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
+    assigned_to INT DEFAULT NULL,
+    category_id INT DEFAULT NULL,
+    title VARCHAR(200) NOT NULL,
+    severity ENUM('Critical','High','Medium','Low') DEFAULT 'Medium',
+    description TEXT NOT NULL,
+    incident_date DATE NOT NULL,
+    suspect_info TEXT NULL,
+    status ENUM('New','Assigned','Under Review','In Progress','Resolved','Closed') DEFAULT 'New',
+    analyst_remarks TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    resolved_at DATETIME NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+
+-- 5. REPORT TIMELINE
+CREATE TABLE IF NOT EXISTS report_timeline (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    report_id INT NOT NULL,
+    user_id INT DEFAULT NULL,
+    action VARCHAR(100) NOT NULL,
+    note TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE
+);
+
+-- Default categories
+INSERT IGNORE INTO categories (name,description) VALUES
+('Cybercrime','Social media hacking, phishing, online fraud, identity theft'),
+('Security Incident','Unauthorized access, suspicious login, data breach, account compromise'),
+('Vulnerability Report','SQL injection, XSS, weak passwords, security misconfiguration'),
+('Bug Report','Login errors, broken features, system crashes, data corruption'),
+('Online Fraud','Financial scams, fake websites, payment fraud, investment fraud'),
+('Social Media Abuse','Harassment, impersonation, fake profiles, cyberbullying'),
+('Ransomware','File encryption, ransom demand, malware infection'),
+('Other','Any cybersecurity issue not listed above');
+
+
+
+
 -- defULT DATA
 -- Admin account (password: admin123)
 INSERT IGNORE INTO users (full_name, email, username, password, role, status)
