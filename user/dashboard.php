@@ -5,11 +5,43 @@ require_once '../includes/layout.php';
 
 auditLog('VIEW', 'Dashboard', 'Viewed user dashboard');
 
-$total = 0;
-$pending = 0;
-$inProgress = 0;
-$resolved = 0;
-$reports = [];
+$db = getDB();
+$uid = $_SESSION['uid'];
+
+// Real statistics
+$total = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ?");
+$total->bind_param('i', $uid);
+$total->execute();
+$total = $total->get_result()->fetch_assoc()['c'];
+
+$pending = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ? AND status IN ('New', 'Assigned')");
+$pending->bind_param('i', $uid);
+$pending->execute();
+$pending = $pending->get_result()->fetch_assoc()['c'];
+
+$inProgress = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ? AND status IN ('Under Review', 'In Progress')");
+$inProgress->bind_param('i', $uid);
+$inProgress->execute();
+$inProgress = $inProgress->get_result()->fetch_assoc()['c'];
+
+$resolved = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ? AND status IN ('Resolved', 'Closed')");
+$resolved->bind_param('i', $uid);
+$resolved->execute();
+$resolved = $resolved->get_result()->fetch_assoc()['c'];
+
+// Recent reports with category and analyst name
+$reports = $db->prepare("
+    SELECT r.*, c.name AS cat_name, u.full_name AS aname
+    FROM reports r
+    LEFT JOIN categories c ON r.category_id = c.id
+    LEFT JOIN users u ON r.assigned_to = u.id
+    WHERE r.user_id = ?
+    ORDER BY r.id DESC
+    LIMIT 8
+");
+$reports->bind_param('i', $uid);
+$reports->execute();
+$reports = $reports->get_result()->fetch_all(MYSQLI_ASSOC);
 
 pageStart('Dashboard', 'user');
 sidebar('user', 'dashboard');
@@ -47,11 +79,30 @@ sidebar('user', 'dashboard');
             <table>
                 <thead>
                     <tr>
-                        <th>Ticket</th><th>Title</th><th>Category</th><th>Severity</th>
-                        <th>Status</th><th>Analyst</th><th>Date</th><th></th>
+                        <th>Ticket</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Analyst</th>
+                        <th>Date</th>
+                        <th></th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    <?php foreach ($reports as $report): ?>
+                        <tr>
+                            <td style="font-family:monospace;color:var(--cy);font-size:11px"><?= e($report['ticket_no']) ?></td>
+                            <td style="color:var(--wh)"><?= e(substr($report['title'], 0, 35)) ?></td>
+                            <td style="font-size:12px"><?= e($report['cat_name'] ?? '—') ?></td>
+                            <td><?= sevBadge($report['severity']) ?></td>
+                            <td><?= statusBadge($report['status']) ?></td>
+                            <td style="font-size:12px;color:var(--mu)"><?= e($report['aname'] ?? 'Unassigned') ?></td>
+                            <td style="font-size:12px;color:var(--mu)"><?= e(substr($report['created_at'], 0, 10)) ?></td>
+                            <td><span style="color:var(--mu);font-size:11px">View (Day 6)</span></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
             </table>
         </div>
     <?php else: ?>
