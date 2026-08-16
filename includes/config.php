@@ -52,3 +52,23 @@ function auditLog($a, $m, $d) {
 function e($s) {
     return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+function genTicket() {
+    return 'CS-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+}
+
+function sevBadge($s) {
+    $colors = ['Critical'=>'#e0333f', 'High'=>'#f2a93c', 'Medium'=>'#3b6fe8', 'Low'=>'#22c55e'];
+    $c = $colors[$s] ?? '#5c7291';
+    return "<span style='background:{$c}18;color:{$c};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid {$c}33'>{$s}</span>";
+}
+
+function statusBadge($s) {
+    $m = [
+        'New' => '#3b6fe8', 'Assigned' => '#7c6ff2', 'Under Review' => '#f2a93c',
+        'In Progress' => '#f2751a', 'Resolved' => '#22c55e', 'Closed' => '#5c7291',
+        'active' => '#22c55e', 'suspended' => '#e0333f'
+    ];
+    $c = $m[$s] ?? '#5c7291';
+    return "<span style='background:{$c}18;color:{$c};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid {$c}44'>{$s}</span>";
+}
