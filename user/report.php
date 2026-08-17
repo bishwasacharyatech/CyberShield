@@ -65,10 +65,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'Submitted';
             $timeline->bind_param('iiss', $reportId, $uid, $action, $note);
             $timeline->execute();
+                
+            if (!empty($_FILES['evidence']['name'])) {
+                $file = $_FILES['evidence'];
+                $validation = validateUpload($file);
 
-            // Evidence upload + admin notifications arrive Day 6 once those tables exist
+                if ($validation['ok']) {
+                    $storedName = uniqid('ev_', true) . '.' . $validation['ext'];
+                    if (move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $storedName)) {
+                        $evidenceStmt = $db->prepare('
+                            INSERT INTO evidence_files (report_id, uploaded_by, original_name, stored_name, file_type, file_size)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ');
+                        $evidenceStmt->bind_param('iisssi', $reportId, $uid, $file['name'], $storedName, $file['type'], $file['size']);
+                        $evidenceStmt->execute();
+                    }
+                } else {
+                    $error .= ' File: ' . $validation['err'];
+                }
+            }
 
-            $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>.";
+            $admins = $db->query("SELECT id FROM users WHERE role = 'admin'")->fetch_all(MYSQLI_ASSOC);
+            foreach ($admins as $admin) {
+                addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs assignment");
+            }
+
+            $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>. <a href='" . BASE_URL . "/user/my-reports.php'>Track it →</a>";
+
+
         } else {
             $error = 'Submission failed. Please try again.';
         }
@@ -131,11 +155,11 @@ sidebar('user', 'report');
             <textarea name="description" class="fi" placeholder="Describe the whole incident: what happened, how it occurred, who was involved, what was the impact..." required style="min-height:130px"><?= e($_POST['description'] ?? '') ?></textarea>
         </div>
 
-        <div class="fg">
+       <div class="fg">
             <label class="fl">Evidence File (optional — max 5MB)</label>
-            <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx" disabled>
+            <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx">
             <div style="font-size:11px;color:var(--mu);margin-top:4px">
-                File upload activates Day 6.
+                Allowed: JPG, PNG, PDF, TXT, DOC, DOCX — Max 5MB
             </div>
         </div>
 
