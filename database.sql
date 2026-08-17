@@ -72,6 +72,32 @@ CREATE TABLE IF NOT EXISTS report_timeline (
     FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE
 );
 
+-- 6. EVIDENCE FILES
+CREATE TABLE IF NOT EXISTS evidence_files (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    report_id INT NOT NULL,
+    uploaded_by INT NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(255) NOT NULL,
+    file_type VARCHAR(50) NOT NULL,
+    file_size INT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 7. NOTIFICATIONS
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    report_id INT DEFAULT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
 -- Default categories
 INSERT IGNORE INTO categories (name,description) VALUES
 ('Cybercrime','Social media hacking, phishing, online fraud, identity theft'),
