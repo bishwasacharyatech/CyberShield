@@ -1,10 +1,10 @@
 <?php
 
-function pageStart($title, $role)
-{
+function pageStart($title, $role) {
     $rc = ['admin' => '#e0333f', 'analyst' => '#7c6ff2', 'user' => '#3b6fe8'][$role] ?? '#3b6fe8';
     $fn = e($_SESSION['fname'] ?? '');
     $base = BASE_URL;
+    $unread = getUnread();
     $escTitle = e($title);
 
     echo '<!DOCTYPE html>
@@ -26,6 +26,9 @@ function pageStart($title, $role)
         <span class="rpill">' . $role . '</span>
         <span class="dot" style="margin-left:4px"></span>
         <div class="ml" style="display:flex;align-items:center;gap:10px">
+            <a href="' . $base . '/' . $role . '/notifications.php" class="notif-btn">
+                🔔' . ($unread > 0 ? '<span class="nbadge">' . $unread . '</span>' : '') . '
+            </a>
             <span style="font-size:13px;color:var(--mu)">👤 <strong style="color:var(--wh)">' . $fn . '</strong></span>
             <a href="' . $base . '/logout.php" class="btn btn-gy btn-sm"><i class="ti ti-logout"></i> Logout</a>
         </div>
@@ -34,12 +37,14 @@ function pageStart($title, $role)
     <div class="wrap">';
 }
 
-function sidebar($role, $active = '')
-{
+function sidebar($role, $active = '') {
     $base = BASE_URL;
     $links = [
         'user' => [
             ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+            ['report', 'Submit Report', 'ti-plus'],
+            ['my-reports', 'My Reports', 'ti-file-text'],
+            ['notifications', 'Notifications', 'ti-bell'],
         ],
     ];
 
@@ -52,7 +57,7 @@ function sidebar($role, $active = '')
         $activeClass = ($active === $page) ? ' active' : '';
         echo '<a href="' . $href . '" class="sb-a' . $activeClass . '">
             <i class="ti ' . $icon . '"></i> ' . $label .
-            '</a>';
+        '</a>';
     }
 
     echo '<div class="sb-bot">
@@ -62,7 +67,6 @@ function sidebar($role, $active = '')
     <div class="content">';
 }
 
-function pageEnd()
-{
+function pageEnd() {
     echo '</div></div></body></html>';
 }
