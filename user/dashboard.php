@@ -30,6 +30,7 @@ $resolved->execute();
 $resolved = $resolved->get_result()->fetch_assoc()['c'];
 
 // Recent reports with category and analyst name
+
 $reports = $db->prepare("
     SELECT r.*, c.name AS cat_name, u.full_name AS aname
     FROM reports r
@@ -42,6 +43,16 @@ $reports = $db->prepare("
 $reports->bind_param('i', $uid);
 $reports->execute();
 $reports = $reports->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$notifications = $db->prepare("
+    SELECT * FROM notifications
+    WHERE user_id = ? AND is_read = 0
+    ORDER BY id DESC
+    LIMIT 5
+");
+$notifications->bind_param('i', $uid);
+$notifications->execute();
+$notifications = $notifications->get_result()->fetch_all(MYSQLI_ASSOC);
 
 pageStart('Dashboard', 'user');
 sidebar('user', 'dashboard');
@@ -68,6 +79,27 @@ sidebar('user', 'dashboard');
         <div class="m-val"><?= (int) $resolved ?></div>
     </div>
 </div>
+
+<?php if ($notifications): ?>
+    <div class="card">
+        <div class="ch">
+            <span class="ct"><i class="ti ti-bell"></i> New Notifications</span>
+            <a href="<?= BASE_URL ?>/user/notifications.php" class="btn btn-gy btn-sm">View All →</a>
+        </div>
+        <?php foreach ($notifications as $notif): ?>
+            <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:center">
+                <span style="color:var(--cy);font-size:16px">🔔</span>
+                <div style="flex:1">
+                    <div style="font-size:13px;color:var(--wh)"><?= e($notif['message']) ?></div>
+                    <div style="font-size:11px;color:var(--mu)"><?= timeAgo($notif['created_at']) ?></div>
+                </div>
+                <?php if ($notif['report_id']): ?>
+                    <a href="<?= BASE_URL ?>/user/view-report.php?id=<?= (int) $notif['report_id'] ?>" class="btn btn-gy btn-sm">View</a>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
 <div class="card">
     <div class="ch">
@@ -99,7 +131,7 @@ sidebar('user', 'dashboard');
                             <td><?= statusBadge($report['status']) ?></td>
                             <td style="font-size:12px;color:var(--mu)"><?= e($report['aname'] ?? 'Unassigned') ?></td>
                             <td style="font-size:12px;color:var(--mu)"><?= e(substr($report['created_at'], 0, 10)) ?></td>
-                            <td><span style="color:var(--mu);font-size:11px">View (Day 6)</span></td>
+                           <td><a href="<?= BASE_URL ?>/user/view-report.php?id=<?= (int) $report['id'] ?>" class="btn btn-gy btn-sm">View</a></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
