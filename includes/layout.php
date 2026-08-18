@@ -46,6 +46,10 @@ function sidebar($role, $active = '') {
             ['my-reports', 'My Reports', 'ti-file-text'],
             ['notifications', 'Notifications', 'ti-bell'],
         ],
+        'analyst' => [
+            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+            ['assigned', 'My Cases', 'ti-clipboard-check'],
+        ],
     ];
 
     echo '<div class="sidebar" id="sbEl">
