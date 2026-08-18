@@ -4,6 +4,8 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'cybershield');
 define('BASE_URL', '/CYBERSHIELD');
+define('UPLOAD_DIR', __DIR__ . '/../uploads/');
+define('UPLOAD_URL', BASE_URL . '/uploads/');
 
 function getDB() {
     static $c = null;
@@ -71,4 +73,40 @@ function statusBadge($s) {
     ];
     $c = $m[$s] ?? '#5c7291';
     return "<span style='background:{$c}18;color:{$c};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid {$c}44'>{$s}</span>";
+}
+
+
+
+function validateUpload($file) {
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt', 'doc', 'docx'];
+    $max = 5 * 1024 * 1024;
+    if ($file['size'] > $max) return ['ok' => false, 'err' => 'File too large. Max 5MB.'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed)) return ['ok' => false, 'err' => 'Allowed types: ' . implode(', ', $allowed)];
+    return ['ok' => true, 'ext' => $ext];
+}
+
+function addNotif($uid, $rid, $msg) {
+    $db = getDB();
+    $s = $db->prepare('INSERT INTO notifications (user_id, report_id, message) VALUES (?,?,?)');
+    $s->bind_param('iis', $uid, $rid, $msg);
+    $s->execute();
+}
+
+function getUnread() {
+    if (empty($_SESSION['uid'])) return 0;
+    $db = getDB();
+    $uid = $_SESSION['uid'];
+    $r = $db->prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND is_read=0');
+    $r->bind_param('i', $uid);
+    $r->execute();
+    return $r->get_result()->fetch_assoc()['c'] ?? 0;
+}
+
+function timeAgo($dt) {
+    $d = time() - strtotime($dt);
+    if ($d < 60) return $d . 's ago';
+    if ($d < 3600) return floor($d / 60) . 'm ago';
+    if ($d < 86400) return floor($d / 3600) . 'h ago';
+    return floor($d / 86400) . 'd ago';
 }

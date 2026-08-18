@@ -1,0 +1,11 @@
+# Prevent directory listing of uploaded evidence filenames
+Options -Indexes
+
+# Prevent execution of scripts in uploads folder
+php_flag engine off
+
+# Block dangerous file types (including double extensions)
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi|.*\.php.*)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
