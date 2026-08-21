@@ -649,3 +649,8 @@ textarea.fi { resize: vertical; min-height: 90px; }
 
 .gr-22 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 .m-sub { font-size: 11px; color: var(--mu); margin-top: 4px; }
+
+/* 17. Button Variants (Danger / Success / Purple) */
+.btn-re { background: var(--re)18; color: var(--re); border: 1px solid var(--re)33; }
+.btn-gr { background: var(--gr)12; color: var(--gr); border: 1px solid var(--gr)25; }
+.btn-pu { background: var(--pu)12; color: var(--pu); border: 1px solid var(--pu)25; }
