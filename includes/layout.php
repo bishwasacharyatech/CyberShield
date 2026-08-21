@@ -53,6 +53,8 @@ function sidebar($role, $active = '') {
         'admin' => [
             ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
             ['reports', 'All Reports', 'ti-file-text'],
+            ['users', 'Manage Users', 'ti-users'],
+            ['categories', 'Categories', 'ti-category'],
         ],
     ];
 
