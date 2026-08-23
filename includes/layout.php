@@ -13,7 +13,6 @@ function pageStart($title, $role) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>' . $escTitle . ' — CyberShield</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <link rel="stylesheet" href="' . BASE_URL . '/assets/style.css">
     <style>
         :root { --rc: ' . $rc . '; }
@@ -30,7 +29,7 @@ function pageStart($title, $role) {
                 🔔' . ($unread > 0 ? '<span class="nbadge">' . $unread . '</span>' : '') . '
             </a>
             <span style="font-size:13px;color:var(--mu)">👤 <strong style="color:var(--wh)">' . $fn . '</strong></span>
-            <a href="' . $base . '/logout.php" class="btn btn-gy btn-sm"><i class="ti ti-logout"></i> Logout</a>
+            <a href="' . $base . '/logout.php" class="btn btn-gy btn-sm">🚪 Logout</a>
         </div>
     </div>
     <div class="overlay" id="ovEl" onclick="document.getElementById(\'sbEl\').classList.remove(\'open\');this.classList.remove(\'show\')"></div>
@@ -41,26 +40,26 @@ function sidebar($role, $active = '') {
     $base = BASE_URL;
     $links = [
         'user' => [
-            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
-            ['report', 'Submit Report', 'ti-plus'],
-            ['my-reports', 'My Reports', 'ti-file-text'],
-            ['notifications', 'Notifications', 'ti-bell'],
-            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
-            ['change-password', 'Change Password', 'ti-lock'],
+            ['dashboard', '📊 Dashboard'],
+            ['report', '➕ Submit Report'],
+            ['my-reports', '📄 My Reports'],
+            ['notifications', '🔔 Notifications'],
+            ['edit-profile', '✏️ Edit Profile'],
+            ['change-password', '🔒 Change Password'],
         ],
         'analyst' => [
-            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
-            ['assigned', 'My Cases', 'ti-clipboard-check'],
-            ['notifications', 'Notifications', 'ti-bell'],
-            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
-            ['change-password', 'Change Password', 'ti-lock'],
+            ['dashboard', '📊 Dashboard'],
+            ['assigned', '📋 My Cases'],
+            ['notifications', '🔔 Notifications'],
+            ['edit-profile', '✏️ Edit Profile'],
+            ['change-password', '🔒 Change Password'],
         ],
         'admin' => [
-            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
-            ['reports', 'All Reports', 'ti-file-text'],
-            ['users', 'Manage Users', 'ti-users'],
-            ['categories', 'Categories', 'ti-category'],
-            ['audit', 'Audit Trail', 'ti-history'],
+            ['dashboard', '📊 Dashboard'],
+            ['reports', '📄 All Reports'],
+            ['users', '👥 Manage Users'],
+            ['categories', '📂 Categories'],
+            ['audit', '📜 Audit Trail'],
         ],
     ];
 
@@ -68,16 +67,16 @@ function sidebar($role, $active = '') {
         <div class="sb-sec">// Menu</div>';
 
     foreach ($links[$role] ?? [] as $link) {
-        [$page, $label, $icon] = $link;
+        [$page, $label] = $link;
         $href = $base . '/' . $role . '/' . $page . '.php';
         $activeClass = ($active === $page) ? ' active' : '';
         echo '<a href="' . $href . '" class="sb-a' . $activeClass . '">
-            <i class="ti ' . $icon . '"></i> ' . $label .
-        '</a>';
+            ' . $label . '
+        </a>';
     }
 
     echo '<div class="sb-bot">
-            <a href="' . $base . '/logout.php" class="sb-a"><i class="ti ti-logout"></i> Logout</a>
+            <a href="' . $base . '/logout.php" class="sb-a">🚪 Logout</a>
         </div>
     </div>
     <div class="content">';
