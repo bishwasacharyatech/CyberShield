@@ -80,7 +80,7 @@ sidebar('analyst', 'dashboard');
 <div class="gr-23">
     <div class="card">
         <div class="ch">
-            <span class="ct"><i class="ti ti-clipboard-check"></i> My Assigned Cases</span>
+            <span class="ct">📋 My Assigned Cases</span>
             <a href="<?= BASE_URL ?>/analyst/assigned.php" class="btn btn-gy btn-sm">All →</a>
         </div>
         <?php if ($myCases): ?>
@@ -116,7 +116,7 @@ sidebar('analyst', 'dashboard');
 
     <div class="card">
         <div class="ch">
-            <span class="ct"><i class="ti ti-history"></i> Recent Activity on My Cases</span>
+            <span class="ct">📜 Recent Activity on My Cases</span>
         </div>
         <?php if ($recentActivity): ?>
             <?php foreach ($recentActivity as $activity): ?>
