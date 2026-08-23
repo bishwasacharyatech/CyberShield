@@ -45,16 +45,22 @@ function sidebar($role, $active = '') {
             ['report', 'Submit Report', 'ti-plus'],
             ['my-reports', 'My Reports', 'ti-file-text'],
             ['notifications', 'Notifications', 'ti-bell'],
+            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
+            ['change-password', 'Change Password', 'ti-lock'],
         ],
         'analyst' => [
             ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
             ['assigned', 'My Cases', 'ti-clipboard-check'],
+            ['notifications', 'Notifications', 'ti-bell'],
+            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
+            ['change-password', 'Change Password', 'ti-lock'],
         ],
         'admin' => [
             ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
             ['reports', 'All Reports', 'ti-file-text'],
             ['users', 'Manage Users', 'ti-users'],
             ['categories', 'Categories', 'ti-category'],
+            ['audit', 'Audit Trail', 'ti-history'],
         ],
     ];
 
