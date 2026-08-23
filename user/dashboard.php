@@ -83,7 +83,7 @@ sidebar('user', 'dashboard');
 <?php if ($notifications): ?>
     <div class="card">
         <div class="ch">
-            <span class="ct"><i class="ti ti-bell"></i> New Notifications</span>
+            <span class="ct">🔔 New Notifications</span>
             <a href="<?= BASE_URL ?>/user/notifications.php" class="btn btn-gy btn-sm">View All →</a>
         </div>
         <?php foreach ($notifications as $notif): ?>
@@ -103,8 +103,8 @@ sidebar('user', 'dashboard');
 
 <div class="card">
     <div class="ch">
-        <span class="ct"><i class="ti ti-file-text"></i> My Recent Reports</span>
-        <a href="<?= BASE_URL ?>/user/report.php" class="btn btn-cy btn-sm"><i class="ti ti-plus"></i> New Report</a>
+        <span class="ct">📄 My Recent Reports</span>
+        <a href="<?= BASE_URL ?>/user/report.php" class="btn btn-cy btn-sm">➕ New Report</a>
     </div>
     <?php if ($reports): ?>
         <div class="tw">
