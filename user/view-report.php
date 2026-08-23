@@ -60,7 +60,7 @@ sidebar('user', 'my-reports');
 <div class="gr-23">
     <div>
         <div class="card">
-            <div class="ch"><span class="ct"><i class="ti ti-file-description"></i> Report Details</span></div>
+            <div class="ch"><span class="ct">📝 Report Details</span></div>
             <?php
             $detailFields = [
                 ['Title', $report['title'], 'var(--wh)', true],
@@ -98,7 +98,7 @@ sidebar('user', 'my-reports');
 
         <?php if ($evidence): ?>
             <div class="card">
-                <div class="ch"><span class="ct"><i class="ti ti-paperclip"></i> Evidence Files</span></div>
+                <div class="ch"><span class="ct">📎 Evidence Files</span></div>
                 <?php foreach ($evidence as $file): ?>
                     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)">
                         <span style="font-size:20px">📎</span>
@@ -116,7 +116,7 @@ sidebar('user', 'my-reports');
     </div>
 
     <div class="card">
-        <div class="ch"><span class="ct"><i class="ti ti-timeline"></i> Timeline</span></div>
+        <div class="ch"><span class="ct">⏳ Timeline</span></div>
         <?php
         $timelineColors = [
             'Submitted' => '#00d4ff', 'Assigned' => '#8b5cf6', 'Under Review' => '#f59e0b',

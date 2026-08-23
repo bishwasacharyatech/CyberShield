@@ -86,8 +86,8 @@ sidebar('user', 'my-reports');
 
 <div class="card">
     <div class="ch">
-        <span class="ct"><i class="ti ti-file-text"></i> Reports</span>
-        <a href="<?= BASE_URL ?>/user/report.php" class="btn btn-cy btn-sm"><i class="ti ti-plus"></i> New</a>
+        <span class="ct">📄 Reports</span>
+        <a href="<?= BASE_URL ?>/user/report.php" class="btn btn-cy btn-sm">➕ New</a>
     </div>
     <?php if ($reports): ?>
         <div class="tw">

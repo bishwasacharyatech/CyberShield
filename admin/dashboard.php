@@ -53,7 +53,7 @@ sidebar('admin', 'dashboard');
 
 <div class="card">
     <div class="ch">
-        <span class="ct"><i class="ti ti-file-text"></i> Recent Reports</span>
+        <span class="ct">📄 Recent Reports</span>
         <a href="<?= BASE_URL ?>/admin/reports.php" class="btn btn-gy btn-sm">All →</a>
     </div>
     <div class="tw">

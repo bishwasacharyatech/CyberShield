@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- 2. AUDIT LOGS
 CREATE TABLE IF NOT EXISTS audit_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -97,7 +96,6 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-
 -- Default categories
 INSERT IGNORE INTO categories (name,description) VALUES
 ('Cybercrime','Social media hacking, phishing, online fraud, identity theft'),
@@ -109,11 +107,7 @@ INSERT IGNORE INTO categories (name,description) VALUES
 ('Ransomware','File encryption, ransom demand, malware infection'),
 ('Other','Any cybersecurity issue not listed above');
 
-
-
-
--- defULT DATA
--- Admin account (password: admin123)
+-- Default admin account (password: admin123)
 INSERT IGNORE INTO users (full_name, email, username, password, role, status)
 VALUES ('System Admin','admin@cybershield.local','admin',
 '$2y$12$tupP5G7hw4nuPncjBBaA6.Nfcf4DWWWfWPaRjT7Js1NjkycxNbv.q','admin','active');

@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $validCategoryIds = array_column($categories, 'id');
 
+    // Validate date
     $dateValid = false;
     if ($incidentDate && preg_match('/^\d{4}-\d{2}-\d{2}$/', $incidentDate)) {
         [$yy, $mm, $dd] = explode('-', $incidentDate);
@@ -31,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Basic validation
     if (!$title || !$categoryId || !$description || !$incidentDate) {
         $error = 'Please fill all required fields.';
     } elseif (!in_array($categoryId, $validCategoryIds)) {
@@ -38,40 +40,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$dateValid) {
         $error = 'Incident date must be a valid date and cannot be in the future.';
     } else {
-        $ticketNo = genTicket();
+        
+        // FILE VALIDATION (before any DB insert)
+        $fileError = '';
+        $storedName = null;
+        $uploadOk = true;
 
-        $extraInfo = '';
-        foreach ($extraFields as $key => $value) {
-            if (!empty($value)) {
-                $label = str_replace('_', ' ', ucfirst($key));
-                $extraInfo .= "{$label}: {$value}\n";
+        if (!empty($_FILES['evidence']['name'])) {
+            $file = $_FILES['evidence'];
+            $validation = validateUpload($file);
+
+            if ($validation['ok']) {
+                // File is valid, prepare to upload later
+                $storedName = uniqid('ev_', true) . '.' . $validation['ext'];
+            } else {
+                // File is invalid — block submission
+                $uploadOk = false;
+                $fileError = $validation['err'];
             }
         }
-        $suspectInfo = trim($extraInfo);
 
-        $stmt = $db->prepare('
-            INSERT INTO reports (ticket_no, user_id, category_id, title, severity, description, incident_date, suspect_info)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ');
-        $stmt->bind_param('siisssss', $ticketNo, $uid, $categoryId, $title, $severity, $description, $incidentDate, $suspectInfo);
+        // If file is invalid, stop here and set error
+        if (!$uploadOk) {
+            $error = 'Invalid evidence file: ' . $fileError;
+        } else {
+            
+            // ALL VALID — proceed with report insertion
+            
+            $ticketNo = genTicket();
 
-        if ($stmt->execute()) {
-            $reportId = $db->insert_id;
+            // Build suspect info from extra fields
+            $extraInfo = '';
+            foreach ($extraFields as $key => $value) {
+                if (!empty($value)) {
+                    $label = str_replace('_', ' ', ucfirst($key));
+                    $extraInfo .= "{$label}: {$value}\n";
+                }
+            }
+            $suspectInfo = trim($extraInfo);
 
-            auditLog('CREATE', 'Report', "Submitted #{$ticketNo}: {$title}");
+            $stmt = $db->prepare('
+                INSERT INTO reports (ticket_no, user_id, category_id, title, severity, description, incident_date, suspect_info)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ');
+            $stmt->bind_param('siisssss', $ticketNo, $uid, $categoryId, $title, $severity, $description, $incidentDate, $suspectInfo);
 
-            $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
-            $note = 'Report submitted by ' . $_SESSION['fname'];
-            $action = 'Submitted';
-            $timeline->bind_param('iiss', $reportId, $uid, $action, $note);
-            $timeline->execute();
-                
-            if (!empty($_FILES['evidence']['name'])) {
-                $file = $_FILES['evidence'];
-                $validation = validateUpload($file);
+            if ($stmt->execute()) {
+                $reportId = $db->insert_id;
 
-                if ($validation['ok']) {
-                    $storedName = uniqid('ev_', true) . '.' . $validation['ext'];
+                auditLog('CREATE', 'Report', "Submitted #{$ticketNo}: {$title}");
+
+                $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
+                $note = 'Report submitted by ' . $_SESSION['fname'];
+                $action = 'Submitted';
+                $timeline->bind_param('iiss', $reportId, $uid, $action, $note);
+                $timeline->execute();
+
+                // Now upload the file (if valid)
+                if ($storedName) {
+                    $file = $_FILES['evidence'];
                     if (move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $storedName)) {
                         $evidenceStmt = $db->prepare('
                             INSERT INTO evidence_files (report_id, uploaded_by, original_name, stored_name, file_type, file_size)
@@ -80,21 +107,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $evidenceStmt->bind_param('iisssi', $reportId, $uid, $file['name'], $storedName, $file['type'], $file['size']);
                         $evidenceStmt->execute();
                     }
-                } else {
-                    $error .= ' File: ' . $validation['err'];
                 }
+
+                // Notify admins
+                $admins = $db->query("SELECT id FROM users WHERE role = 'admin'")->fetch_all(MYSQLI_ASSOC);
+                foreach ($admins as $admin) {
+                    addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs assignment");
+                }
+
+                $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>. <a href='" . BASE_URL . "/user/my-reports.php'>Track it →</a>";
+
+            } else {
+                $error = 'Submission failed. Please try again.';
             }
-
-            $admins = $db->query("SELECT id FROM users WHERE role = 'admin'")->fetch_all(MYSQLI_ASSOC);
-            foreach ($admins as $admin) {
-                addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs assignment");
-            }
-
-            $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>. <a href='" . BASE_URL . "/user/my-reports.php'>Track it →</a>";
-
-
-        } else {
-            $error = 'Submission failed. Please try again.';
         }
     }
 }
@@ -155,7 +180,7 @@ sidebar('user', 'report');
             <textarea name="description" class="fi" placeholder="Describe the whole incident: what happened, how it occurred, who was involved, what was the impact..." required style="min-height:130px"><?= e($_POST['description'] ?? '') ?></textarea>
         </div>
 
-       <div class="fg">
+        <div class="fg">
             <label class="fl">Evidence File (optional — max 5MB)</label>
             <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx">
             <div style="font-size:11px;color:var(--mu);margin-top:4px">

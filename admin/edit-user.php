@@ -83,7 +83,7 @@ sidebar('admin', 'users');
 
 <div class="gr-23">
     <div class="card">
-        <div class="ch"><span class="ct"><i class="ti ti-user-edit"></i> Account Details</span></div>
+        <div class="ch"><span class="ct">✏️ Account Details</span></div>
         <form method="POST">
             <input type="hidden" name="update" value="1">
             <div class="fg">
@@ -119,7 +119,7 @@ sidebar('admin', 'users');
     </div>
 
     <div class="card">
-        <div class="ch"><span class="ct"><i class="ti ti-info-circle"></i> Account Info</span></div>
+        <div class="ch"><span class="ct">ℹ️ Account Info</span></div>
         <?php
         $infoFields = [
             ['Joined', substr($user['created_at'], 0, 10)],

@@ -1,9 +1,6 @@
 <?php
 require_once 'includes/config.php';
 ?>
-
-    
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,7 +140,7 @@ require_once 'includes/config.php';
     </div>
 
     <div class="term-section">
-        <h2><span class="num">2.</span> Purpose \& Scope</h2>
+        <h2><span class="num">2.</span> Purpose & Scope</h2>
         <p>CyberShield is a cybersecurity incident management platform designed for academic and organizational use. It enables users to:</p>
         <ul>
             <li><strong>Report</strong> cybersecurity incidents, vulnerabilities, and fraud.</li>
@@ -162,7 +159,7 @@ require_once 'includes/config.php';
     </div>
 
     <div class="term-section">
-        <h2><span class="num">4.</span> Data Privacy \& Evidence</h2>
+        <h2><span class="num">4.</span> Data Privacy & Evidence</h2>
         <ul>
             <li><strong>Confidentiality:</strong> All reports, evidence, and communications are strictly confidential.</li>
             <li><strong>Data Retention:</strong> Reports and evidence are retained for audit purposes.</li>
@@ -180,7 +177,7 @@ require_once 'includes/config.php';
         </ul>
     </div>
 
-        <div class="term-section">
+    <div class="term-section">
         <h2><span class="num">6.</span> Account Termination</h2>
         <ul>
             <li><strong>By User:</strong> You may delete your account by contacting an Administrator.</li>
@@ -205,7 +202,7 @@ require_once 'includes/config.php';
 
     <div class="terms-footer">
         <a href="javascript:history.back()" class="back-btn">← Back</a>
-        <span class="version">Version 2.0 \&bull; CyberShield</span>
+        <span class="version">Version 2.0 &bull; CyberShield</span>
     </div>
 
 </main>

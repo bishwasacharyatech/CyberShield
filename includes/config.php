@@ -37,10 +37,9 @@ function requireAuth($role = null) {
     }
 }
 
-
 function auditLog($a, $m, $d) {
     $ro = $_SESSION['role'] ?? 'unknown';
-    if ($ro === 'admin') return;
+    // Admin actions are now logged too
     $db = getDB();
     $uid = $_SESSION['uid'] ?? null;
     $un = $_SESSION['uname'] ?? 'guest';
@@ -74,8 +73,6 @@ function statusBadge($s) {
     $c = $m[$s] ?? '#5c7291';
     return "<span style='background:{$c}18;color:{$c};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid {$c}44'>{$s}</span>";
 }
-
-
 
 function validateUpload($file) {
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'txt', 'doc', 'docx'];

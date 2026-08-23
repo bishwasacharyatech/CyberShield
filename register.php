@@ -5,7 +5,6 @@ if (!empty($_SESSION['uid'])) {
     exit;
 }
 
-
 $err = '';
 $success = '';
 
@@ -48,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare('INSERT INTO users (full_name, email, username, password, phone, role) VALUES (?, ?, ?, ?, ?, ?)');
             $stmt->bind_param('ssssss', $name, $email, $uname, $hash, $phone, $role);
 
-            // Auto-login after registration ---
             if ($stmt->execute()) {
                 session_regenerate_id(true);
 
