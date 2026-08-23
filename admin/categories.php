@@ -6,7 +6,9 @@ require_once '../includes/layout.php';
 $db = getDB();
 $msg = '';
 
+// Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Update category
     if (isset($_POST['update_id'])) {
         $id = (int) $_POST['update_id'];
         $name = trim($_POST['name'] ?? '');
@@ -14,23 +16,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name) {
             $stmt = $db->prepare('UPDATE categories SET name = ?, description = ? WHERE id = ?');
             $stmt->bind_param('ssi', $name, $desc, $id);
-            if ($stmt->execute()) {
-                $msg = 'Category updated!';
-            } else {
-                $msg = 'That category name already exists.';
-            }
+            $stmt->execute() ? $msg = 'Category updated!' : $msg = 'That category name already exists.';
         } else {
             $msg = 'Name cannot be empty.';
         }
-    } elseif (isset($_POST['toggle_id'])) {
+    }
+    // Toggle active status
+    elseif (isset($_POST['toggle_id'])) {
         $id = (int) $_POST['toggle_id'];
         $db->query("UPDATE categories SET is_active = NOT is_active WHERE id = {$id}");
         $msg = 'Category updated!';
-    } elseif (isset($_POST['delete_id'])) {
+    }
+    // Delete category
+    elseif (isset($_POST['delete_id'])) {
         $id = (int) $_POST['delete_id'];
         $inUse = $db->query("SELECT COUNT(*) AS c FROM reports WHERE category_id = {$id}")->fetch_assoc()['c'];
         if ($inUse > 0) {
-            $msg = "Cannot delete — {$inUse} report(s) use this category. Disable it instead.";
+            $msg = "Cannot delete — {$inUse} report(s) use this category.";
         } else {
             $db->query("DELETE FROM categories WHERE id = {$id}");
             $msg = 'Category deleted!';
@@ -38,9 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Get category to edit (if any)
 $editId = (int) ($_GET['edit'] ?? 0);
 $editCategory = $editId ? $db->query("SELECT * FROM categories WHERE id = {$editId}")->fetch_assoc() : null;
 
+// Get all categories with report count
 $categories = $db->query("
     SELECT c.*, (SELECT COUNT(*) FROM reports WHERE category_id = c.id) AS report_count
     FROM categories c
@@ -51,62 +55,76 @@ pageStart('Categories', 'admin');
 sidebar('admin', 'categories');
 ?>
 
-<div class="pg-title">Report Categories</div>
-<div class="pg-sub">Manage incident report categories.</div>
+<div class="pg-title">📂 Report Categories</div>
+<div class="pg-sub"><?= count($categories) ?> categories total</div>
 
 <?php if ($msg): ?>
     <div class="flash-ok">✅ <?= e($msg) ?></div>
 <?php endif; ?>
 
 <div class="gr-23">
+    <!-- Left: Category List -->
     <div class="card">
-        <div class="ch">
-            <span class="ct"><i class="ti ti-category"></i> All Categories (<?= count($categories) ?>)</span>
-        </div>
+        <div class="ch"><span class="ct">📋 All Categories</span></div>
         <?php foreach ($categories as $cat): ?>
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)">
-                <div style="width:8px;height:8px;border-radius:50%;background:<?= $cat['is_active'] ? 'var(--gr)' : 'var(--mu)' ?>;flex-shrink:0"></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)">
+                <!-- Status indicator -->
+                <span style="font-size:14px;color:<?= $cat['is_active'] ? 'var(--gr)' : 'var(--mu)' ?>">●</span>
+                
+                <!-- Name & Description -->
                 <div style="flex:1">
-                    <div style="font-weight:600;color:var(--wh);font-size:13px"><?= e($cat['name']) ?></div>
+                    <div style="font-weight:600;color:var(--wh);font-size:14px"><?= e($cat['name']) ?></div>
                     <div style="font-size:12px;color:var(--mu)"><?= e($cat['description']) ?></div>
                 </div>
-                <span style="font-size:11px;color:var(--mu);font-family:monospace"><?= (int) $cat['report_count'] ?> reports</span>
-                <a href="<?= BASE_URL ?>/admin/categories.php?edit=<?= $cat['id'] ?>" class="btn btn-pu btn-sm">✎ Edit</a>
+                
+                <!-- Report count -->
+                <span style="font-size:13px;color:var(--mu);font-family:monospace">📊 <?= (int) $cat['report_count'] ?></span>
+                
+                <!-- Action buttons -->
+                <a href="<?= BASE_URL ?>/admin/categories.php?edit=<?= $cat['id'] ?>" class="btn btn-pu btn-sm" style="font-size:16px;padding:4px 10px" title="Edit">✏️</a>
+                
                 <form method="POST" style="display:inline">
                     <input type="hidden" name="toggle_id" value="<?= $cat['id'] ?>">
-                    <button class="btn <?= $cat['is_active'] ? 'btn-re' : 'btn-gr' ?> btn-sm">
-                        <?= $cat['is_active'] ? 'Disable' : 'Enable' ?>
+                    <button class="btn <?= $cat['is_active'] ? 'btn-re' : 'btn-gr' ?> btn-sm" style="font-size:16px;padding:4px 10px" title="<?= $cat['is_active'] ? 'Disable' : 'Enable' ?>">
+                        <?= $cat['is_active'] ? '⛔' : '✅' ?>
                     </button>
                 </form>
+                
                 <form method="POST" style="display:inline" onsubmit="return confirm('Delete this category?')">
                     <input type="hidden" name="delete_id" value="<?= $cat['id'] ?>">
-                    <button class="btn btn-re btn-sm">🗑</button>
+                    <button class="btn btn-re btn-sm" style="font-size:16px;padding:4px 10px" title="Delete">🗑️</button>
                 </form>
             </div>
         <?php endforeach; ?>
+        <?php if (!$categories): ?>
+            <div style="text-align:center;padding:20px;color:var(--mu)">No categories yet.</div>
+        <?php endif; ?>
     </div>
 
+    <!-- Right: Edit Form -->
     <div class="card">
         <?php if ($editCategory): ?>
             <div class="ch">
-                <span class="ct"><i class="ti ti-edit"></i> Edit Category</span>
+                <span class="ct">✏️ Edit Category</span>
                 <a href="<?= BASE_URL ?>/admin/categories.php" class="btn btn-gy btn-sm">Cancel</a>
             </div>
             <form method="POST">
                 <input type="hidden" name="update_id" value="<?= $editCategory['id'] ?>">
                 <div class="fg">
-                    <label class="fl">Category Name *</label>
+                    <label class="fl">Name *</label>
                     <input type="text" name="name" class="fi" value="<?= e($editCategory['name']) ?>" required>
                 </div>
                 <div class="fg">
                     <label class="fl">Description</label>
-                    <textarea name="description" class="fi" style="min-height:80px"><?= e($editCategory['description']) ?></textarea>
+                    <textarea name="description" class="fi" style="min-height:60px"><?= e($editCategory['description']) ?></textarea>
                 </div>
-                <button type="submit" class="btn btn-cy">💾 Update Category</button>
+                <button type="submit" class="btn btn-cy">💾 Update</button>
             </form>
         <?php else: ?>
-            <div style="padding:20px;text-align:center;color:var(--mu)">
-                <p>Select a category to edit or manage existing categories.</p>
+            <div style="text-align:center;padding:30px;color:var(--mu)">
+                <div style="font-size:48px;margin-bottom:8px">📂</div>
+                <p style="color:var(--wh);font-size:14px">Select a category to edit</p>
+                <p style="font-size:12px">Click the <strong>✏️</strong> button on any category</p>
             </div>
         <?php endif; ?>
     </div>
