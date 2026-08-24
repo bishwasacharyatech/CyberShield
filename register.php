@@ -157,13 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
-        <div class="role-box">
-            <label class="role-option">
-                <input type="checkbox" name="is_analyst" value="1" <?= isset($_POST['is_analyst']) ? 'checked' : '' ?>>
-                <span>Register as a <strong>SOC Analyst</strong></span>
-            </label>
-        </div>
-
         <label class="terms-option">
             <input type="checkbox" name="agree" value="1" required <?= isset($_POST['agree']) ? 'checked' : '' ?>>
             <span>I accept the <a href="<?= BASE_URL ?>/terms.php">Terms and Conditions</a></span>
