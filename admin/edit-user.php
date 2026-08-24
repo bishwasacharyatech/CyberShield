@@ -8,7 +8,11 @@ $id = (int) ($_GET['id'] ?? 0);
 $msg = '';
 $err = '';
 
-$user = $db->query("SELECT * FROM users WHERE id = {$id}")->fetch_assoc();
+// Fetch user with prepared statement
+$stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
 if (!$user) {
     header('Location: ' . BASE_URL . '/admin/users.php');
     exit;
@@ -42,15 +46,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('ssssi', $name, $email, $phone, $role, $id);
                 $stmt->execute();
                 $msg = 'User updated successfully!';
-                $user = $db->query("SELECT * FROM users WHERE id = {$id}")->fetch_assoc();
+
+                // Refetch user with prepared statement
+                $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $user = $stmt->get_result()->fetch_assoc();
             }
         }
     } elseif (isset($_POST['delete'])) {
         if ($id == 1) {
             $err = 'Cannot delete the protected admin account.';
         } else {
-            $asReporter = $db->query("SELECT COUNT(*) AS c FROM reports WHERE user_id = {$id}")->fetch_assoc()['c'];
-            $asAnalyst  = $db->query("SELECT COUNT(*) AS c FROM reports WHERE assigned_to = {$id}")->fetch_assoc()['c'];
+            // Use prepared statements for counts
+            $stmt = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $asReporter = $stmt->get_result()->fetch_assoc()['c'];
+
+            $stmt = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE assigned_to = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $asAnalyst = $stmt->get_result()->fetch_assoc()['c'];
+
             if ($asReporter > 0 || $asAnalyst > 0) {
                 $err = "Cannot delete — this account has {$asReporter} submitted report(s) and {$asAnalyst} assigned case(s).";
             } else {
@@ -121,11 +139,22 @@ sidebar('admin', 'users');
     <div class="card">
         <div class="ch"><span class="ct">ℹ️ Account Info</span></div>
         <?php
+        // Use prepared statements for info counts
+        $stmt = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE user_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $reportCount = $stmt->get_result()->fetch_assoc()['c'];
+
+        $stmt = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE assigned_to = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $assignedCount = $stmt->get_result()->fetch_assoc()['c'];
+
         $infoFields = [
             ['Joined', substr($user['created_at'], 0, 10)],
             ['Last Login', $user['last_login'] ? substr($user['last_login'], 0, 16) : 'Never'],
-            ['Reports Submitted', $db->query("SELECT COUNT(*) AS c FROM reports WHERE user_id = {$id}")->fetch_assoc()['c']],
-            ['Cases Assigned', $db->query("SELECT COUNT(*) AS c FROM reports WHERE assigned_to = {$id}")->fetch_assoc()['c']]
+            ['Reports Submitted', $reportCount],
+            ['Cases Assigned', $assignedCount]
         ];
         foreach ($infoFields as [$label, $value]): ?>
             <div style="display:flex;padding:8px 0;border-bottom:1px solid var(--bd)">

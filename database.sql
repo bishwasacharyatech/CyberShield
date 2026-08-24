@@ -95,7 +95,19 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
+-- 12. ANALYST REQUESTS
+CREATE TABLE IF NOT EXISTS analyst_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    reason TEXT NOT NULL,
+    skills TEXT NULL,
+    status ENUM('pending','approved','rejected') DEFAULT 'pending',
+    reviewed_by INT DEFAULT NULL,
+    reviewed_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+);
 -- Default categories
 INSERT IGNORE INTO categories (name,description) VALUES
 ('Cybercrime','Social media hacking, phishing, online fraud, identity theft'),

@@ -35,36 +35,43 @@ function pageStart($title, $role) {
     <div class="overlay" id="ovEl" onclick="document.getElementById(\'sbEl\').classList.remove(\'open\');this.classList.remove(\'show\')"></div>
     <div class="wrap">';
 }
-
 function sidebar($role, $active = '') {
     $base = BASE_URL;
+    $pendingAnalystReqs = ($role === 'admin') ? getPendingAnalystRequests() : 0;
     $links = [
         'user' => [
-            ['dashboard', '📊 Dashboard'],
-            ['report', '➕ Submit Report'],
-            ['my-reports', '📄 My Reports'],
-            ['notifications', '🔔 Notifications'],
-            ['edit-profile', '✏️ Edit Profile'],
-            ['change-password', '🔒 Change Password'],
+            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+            ['report', 'Submit Report', 'ti-plus'],
+            ['my-reports', 'My Reports', 'ti-file-text'],
+            ['apply-analyst', 'Apply as Analyst', 'ti-user-plus'],
+            ['notifications', 'Notifications', 'ti-bell'],
+            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
+            ['change-password', 'Change Password', 'ti-lock'],
         ],
         'analyst' => [
-            ['dashboard', '📊 Dashboard'],
-            ['assigned', '📋 My Cases'],
-            ['notifications', '🔔 Notifications'],
-            ['edit-profile', '✏️ Edit Profile'],
-            ['change-password', '🔒 Change Password'],
+            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+            ['assigned', 'My Cases', 'ti-clipboard-check'],
+            ['notifications', 'Notifications', 'ti-bell'],
+            ['edit-profile', 'Edit Profile', 'ti-user-edit'],
+            ['change-password', 'Change Password', 'ti-lock'],
         ],
         'admin' => [
-            ['dashboard', '📊 Dashboard'],
-            ['reports', '📄 All Reports'],
-            ['users', '👥 Manage Users'],
-            ['categories', '📂 Categories'],
-            ['audit', '📜 Audit Trail'],
-        ],
+            ['dashboard', 'Dashboard', 'ti-layout-dashboard'],
+            ['reports', 'All Reports', 'ti-file-text'],
+            ['users', 'Manage Users', 'ti-users'],
+            ['analyst-requests', 'Analyst Requests', 'ti-user-check', $pendingAnalystReqs],
+            ['assign', 'Assign Reports', 'ti-user-pin'],
+            ['categories', 'Categories', 'ti-category'],
+            ['audit', 'Audit Trail', 'ti-history'],
+            ['siem/dashboard', 'SIEM Dashboard', 'ti-shield'],
+            ['siem/logs', 'SIEM Logs', 'ti-terminal-2'],
+            ['siem/alerts', 'SIEM Alerts', 'ti-bell'],
+            ['siem/rules', 'Detection Rules', 'ti-settings-automation'],
+        ]
     ];
-
+    
     echo '<div class="sidebar" id="sbEl">
-        <div class="sb-sec">// Menu</div>';
+        <div class="sb-sec">📋 Menu</div>';
 
     foreach ($links[$role] ?? [] as $link) {
         [$page, $label] = $link;

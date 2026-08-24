@@ -11,7 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'])) {
     if ($tid == 1) {
         $msg = 'Cannot suspend the protected admin account.';
     } else {
-        $user = $db->query("SELECT status FROM users WHERE id = {$tid}")->fetch_assoc();
+       $stmt = $db->prepare("SELECT status FROM users WHERE id = ?");
+$stmt->bind_param('i', $tid);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
         if ($user) {
             $newStatus = ($user['status'] === 'active') ? 'suspended' : 'active';
             $stmt = $db->prepare("UPDATE users SET status = ? WHERE id = ?");

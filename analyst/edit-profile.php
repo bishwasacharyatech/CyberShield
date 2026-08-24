@@ -8,7 +8,11 @@ $uid = $_SESSION['uid'];
 $msg = '';
 $err = '';
 
-$user = $db->query("SELECT * FROM users WHERE id = {$uid}")->fetch_assoc();
+// ✅ Use prepared statement
+$stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param('i', $uid);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullName = trim($_POST['full_name'] ?? '');
@@ -26,11 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
 
         $_SESSION['fname'] = $fullName;
-
         auditLog('UPDATE', 'Profile', 'Updated profile information');
 
         $msg = 'Profile updated successfully!';
-        $user = $db->query("SELECT * FROM users WHERE id = {$uid}")->fetch_assoc();
+
+        // ✅ Refetch with prepared statement
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->bind_param('i', $uid);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
     }
 }
 

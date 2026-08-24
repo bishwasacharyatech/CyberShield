@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pw2   = $_POST['confirm_password'] ?? '';
     $phone = trim($_POST['phone'] ?? '');
 
+    // 👇 NEW: Check if the user wants to register as an analyst
     $role = isset($_POST['is_analyst']) ? 'analyst' : 'user';
 
     if (!$name || !$email || !$uname || !$pw || !$phone) {
@@ -28,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err = 'Please enter a valid email address.';
     } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
         $err = 'Phone number must be exactly 10 digits.';
-    } elseif (strlen($pw) < 6) {
-        $err = 'Password must be at least 6 characters.';
+    } elseif (strlen($pw) < 8) {   // ✅ Changed from 6 to 8
+        $err = 'Password must be at least 8 characters.';
     } elseif ($pw !== $pw2) {
         $err = 'Passwords do not match.';
     } elseif (!isset($_POST['agree'])) {
@@ -85,6 +86,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .password-group input { padding-right: 45px !important; }
         #togglePassword { transition: color 0.2s; }
         #togglePassword:hover { color: var(--blue) !important; }
+
+        /* ---- Role checkbox styling ---- */
+        .role-box {
+            background: var(--bg3);
+            border: 1px solid var(--bd);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 4px 0 14px 0;
+        }
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--tx);
+        }
+        .role-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--cy);
+            cursor: pointer;
+        }
+        .role-option strong {
+            color: var(--pu);
+        }
     </style>
 </head>
 <body class="auth-body">
@@ -140,14 +167,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group password-group">
                 <label for="password">Password *</label>
                 <div style="position:relative;">
-                    <input type="password" id="password" name="password" placeholder="Min. 6 characters" required>
+                    <input type="password" id="password" name="password" placeholder="Min. 8 characters" required>
                     <button type="button" id="togglePassword" 
                         style="position:absolute; right:10px; top:50%; transform:translateY(-50%); 
                                background:none; border:none; color:#9ca3af; cursor:pointer; font-size:18px;">
                         👁️
                     </button>
                 </div>
-                <div class="input-hint" id="pw-hint">Min 6 characters.</div>
+                <div class="input-hint" id="pw-hint">Min 8 characters.</div>
             </div>
 
             <div class="form-group">
@@ -155,6 +182,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
                 <div class="input-hint" id="pw2-hint">Passwords do not match.</div>
             </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!--  👇  NEW: "Register as SOC Analyst" checkbox  -->
+        <!-- ============================================ -->
+        <div class="role-box">
+            <label class="role-option">
+                <input type="checkbox" name="is_analyst" value="1" <?= isset($_POST['is_analyst']) ? 'checked' : '' ?>>
+                <span>Register as a <strong>SOC Analyst</strong> (you’ll get access to investigation tools immediately)</span>
+            </label>
         </div>
 
         <label class="terms-option">
@@ -175,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
-    
+
     if (togglePassword && password) {
         togglePassword.addEventListener('click', function() {
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';

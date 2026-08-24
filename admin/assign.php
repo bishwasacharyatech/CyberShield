@@ -8,13 +8,17 @@ $id = (int) ($_GET['id'] ?? 0);
 $msg = '';
 $err = '';
 
-$report = $db->query("
+
+$stmt = $db->prepare("
     SELECT r.*, c.name AS cat_name, u.full_name AS uname
     FROM reports r
     LEFT JOIN categories c ON r.category_id = c.id
     LEFT JOIN users u ON r.user_id = u.id
-    WHERE r.id = {$id}
-")->fetch_assoc();
+    WHERE r.id = ?
+");
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$report = $stmt->get_result()->fetch_assoc();
 
 if (!$report) {
     header('Location: ' . BASE_URL . '/admin/reports.php');
@@ -78,13 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $msg = 'Report updated!';
 
-        $report = $db->query("
+        // ============================================================
+        // FIX 2: Use prepared statement for refresh query
+        // ============================================================
+        $stmt = $db->prepare("
             SELECT r.*, c.name AS cat_name, u.full_name AS uname
             FROM reports r
             LEFT JOIN categories c ON r.category_id = c.id
             LEFT JOIN users u ON r.user_id = u.id
-            WHERE r.id = {$id}
-        ")->fetch_assoc();
+            WHERE r.id = ?
+        ");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $report = $stmt->get_result()->fetch_assoc();
 
         $timelineStmt->execute();
         $timeline = $timelineStmt->get_result()->fetch_all(MYSQLI_ASSOC);

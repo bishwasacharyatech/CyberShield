@@ -24,17 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Toggle active status
     elseif (isset($_POST['toggle_id'])) {
         $id = (int) $_POST['toggle_id'];
-        $db->query("UPDATE categories SET is_active = NOT is_active WHERE id = {$id}");
+        $stmt = $db->prepare("UPDATE categories SET is_active = NOT is_active WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
         $msg = 'Category updated!';
     }
     // Delete category
     elseif (isset($_POST['delete_id'])) {
         $id = (int) $_POST['delete_id'];
-        $inUse = $db->query("SELECT COUNT(*) AS c FROM reports WHERE category_id = {$id}")->fetch_assoc()['c'];
+        $stmt = $db->prepare("SELECT COUNT(*) AS c FROM reports WHERE category_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $inUse = $stmt->get_result()->fetch_assoc()['c'];
         if ($inUse > 0) {
             $msg = "Cannot delete — {$inUse} report(s) use this category.";
         } else {
-            $db->query("DELETE FROM categories WHERE id = {$id}");
+            $stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
             $msg = 'Category deleted!';
         }
     }
@@ -42,7 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get category to edit (if any)
 $editId = (int) ($_GET['edit'] ?? 0);
-$editCategory = $editId ? $db->query("SELECT * FROM categories WHERE id = {$editId}")->fetch_assoc() : null;
+$editCategory = null;
+if ($editId) {
+    $stmt = $db->prepare("SELECT * FROM categories WHERE id = ?");
+    $stmt->bind_param('i', $editId);
+    $stmt->execute();
+    $editCategory = $stmt->get_result()->fetch_assoc();
+}
 
 // Get all categories with report count
 $categories = $db->query("
