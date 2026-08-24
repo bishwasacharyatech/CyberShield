@@ -36,15 +36,14 @@ function requireAuth($role = null) {
         exit;
     }
 }
-
 function auditLog($a, $m, $d) {
     $ro = $_SESSION['role'] ?? 'unknown';
-    // Admin actions are now logged too
-    $db = getDB();
     $uid = $_SESSION['uid'] ?? null;
     $un = $_SESSION['uname'] ?? 'guest';
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0';
     $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200);
+
+    $db = getDB();
     $s = $db->prepare('INSERT INTO audit_logs (user_id, username, role, action, module, description, ip_address, user_agent) VALUES (?,?,?,?,?,?,?,?)');
     $s->bind_param('isssssss', $uid, $un, $ro, $a, $m, $d, $ip, $ua);
     $s->execute();
@@ -98,6 +97,11 @@ function getUnread() {
     $r->bind_param('i', $uid);
     $r->execute();
     return $r->get_result()->fetch_assoc()['c'] ?? 0;
+}
+function getPendingAnalystRequests() {
+    $db = getDB();
+    $r = $db->query("SELECT COUNT(*) c FROM analyst_requests WHERE status = 'pending'");
+    return $r->fetch_assoc()['c'] ?? 0;
 }
 
 function timeAgo($dt) {
