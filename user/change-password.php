@@ -8,12 +8,16 @@ $uid = $_SESSION['uid'];
 $msg = '';
 $err = '';
 
+// Fetch user with prepared statement
+$stmt = $db->prepare("SELECT password FROM users WHERE id = ?");
+$stmt->bind_param('i', $uid);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old  = $_POST['old_password'] ?? '';
     $new  = $_POST['new_password'] ?? '';
     $conf = $_POST['confirm_password'] ?? '';
-
-    $user = $db->query("SELECT password FROM users WHERE id = {$uid}")->fetch_assoc();
 
     if (!password_verify($old, $user['password'])) {
         $err = 'Current password is incorrect.';
