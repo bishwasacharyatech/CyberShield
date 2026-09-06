@@ -1,6 +1,7 @@
 <?php
 
-function pageStart($title, $role) {
+function pageStart($title, $role)
+{
     $rc = ['admin' => '#e0333f', 'analyst' => '#7c6ff2', 'user' => '#3b6fe8'][$role] ?? '#3b6fe8';
     $fn = e($_SESSION['fname'] ?? '');
     $base = BASE_URL;
@@ -35,7 +36,8 @@ function pageStart($title, $role) {
     <div class="overlay" id="ovEl" onclick="document.getElementById(\'sbEl\').classList.remove(\'open\');this.classList.remove(\'show\')"></div>
     <div class="wrap">';
 }
-function sidebar($role, $active = '') {
+function sidebar($role, $active = '')
+{
     $base = BASE_URL;
     $pendingAnalystReqs = ($role === 'admin') ? getPendingAnalystRequests() : 0;
     $links = [
@@ -69,7 +71,7 @@ function sidebar($role, $active = '') {
             ['siem/rules', 'Detection Rules', 'ti-settings-automation'],
         ]
     ];
-    
+
     echo '<div class="sidebar" id="sbEl">
         <div class="sb-sec">📋 Menu</div>';
 
@@ -89,6 +91,11 @@ function sidebar($role, $active = '') {
     <div class="content">';
 }
 
-function pageEnd() {
-    echo '</div></div></body></html>';
+function pageEnd()
+{
+    echo '</div></div>
+    <footer class="global-footer" style="margin-top:30px; border-top:1px solid var(--bd); padding:16px; text-align:center; font-size:0.8rem; color:var(--mu);">
+        <p>&copy; 2026 CyberShield — Cybersecurity Incident Management System</p>
+    </footer>
+    </body></html>';
 }

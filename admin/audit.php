@@ -84,7 +84,14 @@ sidebar('admin', 'audit');
         <table>
             <thead style="position:sticky;top:0">
                 <tr>
-                    <th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Module</th><th>Description</th><th>IP</th>
+                    <th>Time</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Description</th>
+                    <th>IP</th>
+                    <th>Device</th>
                 </tr>
             </thead>
             <tbody>
@@ -105,10 +112,26 @@ sidebar('admin', 'audit');
                         <td style="font-size:12px;color:var(--mu)"><?= e($log['module']) ?></td>
                         <td style="font-size:12px;max-width:240px;white-space:normal"><?= e($log['description']) ?></td>
                         <td style="font-family:monospace;font-size:11px;color:var(--cy)"><?= e($log['ip_address']) ?></td>
+
+                        <!-- Device column: Line 1 = browser/OS/type, Line 2 = device code -->
+                        <td style="max-width:180px;white-space:normal;word-break:break-word;line-height:1.4"
+                            title="<?= e($log['user_agent'] ?? '') ?>">
+                            <!-- Line 1: browser / OS / device type -->
+                            <div style="font-size:11px;color:var(--mu)">
+                                <?= e(parseUserAgent($log['user_agent'] ?? '')) ?>
+                            </div>
+                            <!-- Line 2: real device code (model code) -->
+                            <?php
+                                $code = getDeviceCode($log['user_agent'] ?? '');
+                                if ($code) {
+                                    echo '<div style="font-size:10px;color:var(--cy);opacity:0.85">' . e($code) . '</div>';
+                                }
+                            ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (!$logs): ?>
-                    <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--mu)">No audit logs found</td></tr>
+                    <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--mu);">No audit logs found</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

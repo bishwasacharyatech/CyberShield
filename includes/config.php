@@ -36,12 +36,13 @@ function requireAuth($role = null) {
         exit;
     }
 }
+
 function auditLog($a, $m, $d) {
     $ro = $_SESSION['role'] ?? 'unknown';
     $uid = $_SESSION['uid'] ?? null;
     $un = $_SESSION['uname'] ?? 'guest';
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0';
-    $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200);
+    $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
 
     $db = getDB();
     $s = $db->prepare('INSERT INTO audit_logs (user_id, username, role, action, module, description, ip_address, user_agent) VALUES (?,?,?,?,?,?,?,?)');
@@ -98,6 +99,7 @@ function getUnread() {
     $r->execute();
     return $r->get_result()->fetch_assoc()['c'] ?? 0;
 }
+
 function getPendingAnalystRequests() {
     $db = getDB();
     $r = $db->query("SELECT COUNT(*) c FROM analyst_requests WHERE status = 'pending'");
@@ -111,3 +113,77 @@ function timeAgo($dt) {
     if ($d < 86400) return floor($d / 3600) . 'h ago';
     return floor($d / 86400) . 'd ago';
 }
+
+// ─── parseUserAgent ─────────────────────────────────────────────
+function parseUserAgent($ua, $asString = true) {
+    if (empty($ua)) {
+        return $asString ? 'Unknown' : ['browser' => 'Unknown', 'os' => 'Unknown', 'device' => 'Unknown'];
+    }
+
+    $browser = 'Unknown';
+    if (stripos($ua, 'Firefox') !== false) $browser = 'Firefox';
+    elseif (stripos($ua, 'Chrome') !== false && stripos($ua, 'Edg') === false && stripos($ua, 'OPR') === false) $browser = 'Chrome';
+    elseif (stripos($ua, 'Safari') !== false && stripos($ua, 'Chrome') === false && stripos($ua, 'Android') === false) $browser = 'Safari';
+    elseif (stripos($ua, 'Edge') !== false || stripos($ua, 'Edg') !== false) $browser = 'Edge';
+    elseif (stripos($ua, 'Opera') !== false || stripos($ua, 'OPR') !== false) $browser = 'Opera';
+    elseif (stripos($ua, 'MSIE') !== false || stripos($ua, 'Trident') !== false) $browser = 'IE';
+    elseif (stripos($ua, 'SamsungBrowser') !== false) $browser = 'Samsung Internet';
+
+    $os = 'Unknown';
+    if (stripos($ua, 'iPhone') !== false || stripos($ua, 'iPad') !== false || stripos($ua, 'iPod') !== false) {
+        $os = 'iOS';
+    } elseif (stripos($ua, 'Android') !== false) {
+        $os = 'Android';
+    } elseif (stripos($ua, 'Windows') !== false) {
+        $os = 'Windows';
+    } elseif (stripos($ua, 'Mac OS X') !== false || stripos($ua, 'Macintosh') !== false) {
+        $os = 'macOS';
+    } elseif (stripos($ua, 'Ubuntu') !== false) {
+        $os = 'Ubuntu';
+    } elseif (stripos($ua, 'Linux') !== false) {
+        $os = 'Linux';
+    }
+
+    $device = 'Desktop';
+    if (stripos($ua, 'Mobile') !== false) {
+        $device = 'Mobile';
+        if (stripos($ua, 'iPad') !== false || stripos($ua, 'Tablet') !== false) $device = 'Tablet';
+    } elseif (stripos($ua, 'iPad') !== false || stripos($ua, 'Tablet') !== false) $device = 'Tablet';
+    elseif (stripos($ua, 'Android') !== false && stripos($ua, 'Mobile') === false) $device = 'Tablet';
+
+    if ($asString) return $browser . ' / ' . $os . ' / ' . $device;
+    return ['browser' => $browser, 'os' => $os, 'device' => $device];
+}
+
+// ─── getDeviceCode – Extracts the real device identifier (model code) ──
+function getDeviceCode($ua) {
+    if (empty($ua)) return '';
+
+    // Android: model code
+    if (preg_match('/Android [\d.]+;\s*([^;)]+)/', $ua, $m)) {
+        return trim($m[1]); // e.g., SM-A042F, Pixel 6, moto g power
+    }
+
+    // Apple: iPhone / iPad / iPod
+    if (preg_match('/(iPhone|iPad|iPod)/', $ua, $m)) {
+        return $m[1];
+    }
+
+    // Windows: OS version as identifier
+    if (preg_match('/Windows NT ([\d.]+)/', $ua, $m)) {
+        $ver = ['10.0'=>'10/11', '6.3'=>'8.1', '6.2'=>'8', '6.1'=>'7', '6.0'=>'Vista'][$m[1]] ?? $m[1];
+        return 'Windows ' . $ver;
+    }
+
+    // macOS: version
+    if (preg_match('/Mac OS X ([\d_]+)/', $ua, $m)) {
+        return 'macOS ' . str_replace('_', '.', $m[1]);
+    }
+
+    // Linux / Ubuntu
+    if (stripos($ua, 'Ubuntu') !== false) return 'Ubuntu';
+    if (stripos($ua, 'Linux') !== false) return 'Linux';
+
+    return '';
+}
+?>

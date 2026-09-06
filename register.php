@@ -75,13 +75,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/style.css">
     <style>
         .auth-card {
-            max-width: 500px
+            max-width: 443px;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .brand-header {
+            margin-bottom: 0.75rem;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: .85rem
+            gap: 0.5rem 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.4rem;
         }
 
         .full-width {
@@ -98,12 +107,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        .password-group {
+            position: relative;
+        }
+
         .password-group input {
-            padding-right: 45px !important
+            padding-right: 42px !important;
         }
 
         #togglePassword {
-            transition: color .2s
+            position: absolute;
+            right: 12px;
+            top: 36px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color .2s;
+            z-index: 5;
         }
 
         #togglePassword:hover {
@@ -114,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--bg3);
             border: 1px solid var(--bd);
             border-radius: 8px;
-            padding: 12px 16px;
-            margin: 4px 0 14px
+            padding: 8px 12px;
+            margin: 2px 0 10px
         }
 
         .role-option {
@@ -123,13 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--tx)
         }
 
         .role-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             accent-color: var(--cy);
             cursor: pointer
         }
@@ -139,16 +165,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .role-note {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--mu);
-            margin-top: 4px;
-            margin-left: 28px
+            margin-top: 2px;
+            margin-left: 26px
+        }
+
+        .terms-option {
+            font-size: 13px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .divider {
+            margin: 0.75rem 0;
         }
 
         .input-hint {
-            font-size: .75rem;
+            font-size: .7rem;
             color: var(--mu);
-            margin-top: 4px;
+            margin-top: 2px;
             display: none
         }
 
@@ -186,37 +224,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <?php if ($success): ?>
             <div
-                style="background:rgba(63,185,80,.1);border:1px solid #3fb950;color:#3fb950;padding:.75rem;border-radius:6px;font-size:.85rem;margin-bottom:1.25rem">
+                style="background:rgba(63,185,80,.1);border:1px solid #3fb950;color:#3fb950;padding:.5rem;border-radius:6px;font-size:.8rem;margin-bottom:0.75rem">
                 <?= e($success) ?></div><?php endif; ?>
         <?php if ($err): ?>
-            <div class="alert-error"><span><?= e($err) ?></span></div><?php endif; ?>
+            <div class="alert-error" style="padding: 0.5rem; margin-bottom: 0.75rem;"><span><?= e($err) ?></span></div><?php endif; ?>
         <form method="POST" id="regForm" novalidate>
             <div class="form-grid">
                 <div class="form-group"><label for="full_name">Full Name *</label><input type="text" id="full_name"
                         name="full_name" placeholder="John Doe" required value="<?= e($_POST['full_name'] ?? '') ?>">
-                    <div class="input-hint" id="name-hint">Must be 3+ letters (letters & spaces only).</div>
+                    <div class="input-hint" id="name-hint">Letters & spaces only.</div>
                 </div>
                 <div class="form-group"><label for="phone">Phone Number *</label><input type="tel" id="phone"
                         name="phone" placeholder="10-digit number" maxlength="10" required
                         value="<?= e($_POST['phone'] ?? '') ?>">
-                    <div class="input-hint" id="phone-hint">Must be exactly 10 digits.</div>
+                    <div class="input-hint" id="phone-hint">10 digits required.</div>
                 </div>
                 <div class="form-group full-width"><label for="email">Email Address *</label><input type="email"
                         id="email" name="email" placeholder="name@domain.com" required
                         value="<?= e($_POST['email'] ?? '') ?>">
-                    <div class="input-hint" id="email-hint">Enter a valid email address.</div>
+                    <div class="input-hint" id="email-hint">Valid email required.</div>
                 </div>
                 <div class="form-group full-width"><label for="username">Username *</label><input type="text"
                         id="username" name="username" placeholder="Choose a unique handle" required
                         value="<?= e($_POST['username'] ?? '') ?>">
-                    <div class="input-hint" id="user-hint">Must be 3–20 characters (letters, numbers, _).</div>
+                    <div class="input-hint" id="user-hint">3–20 chars (letters, numbers, _).</div>
                 </div>
-                <div class="form-group password-group"><label for="password">Password *</label>
-                    <div style="position:relative"><input type="password" id="password" name="password"
-                            placeholder="Min. 8 characters" required><button type="button" id="togglePassword"
-                            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px">👁️</button>
-                    </div>
-                    <div class="input-hint" id="pw-hint">Min 8 characters.</div>
+                <div class="form-group password-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" placeholder="Min. 8 characters" required>
+                    <button type="button" id="togglePassword" aria-label="Toggle password visibility">👁️</button>
+                    <div class="input-hint" id="pw-hint">Min. 8 characters.</div>
                 </div>
                 <div class="form-group"><label for="confirm_password">Confirm Password *</label><input type="password"
                         id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
