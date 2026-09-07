@@ -8,7 +8,6 @@ $uid = $_SESSION['uid'];
 $msg = '';
 $err = '';
 
-// ✅ Use prepared statement
 $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->bind_param('i', $uid);
 $stmt->execute();
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $msg = 'Profile updated successfully!';
 
-        // ✅ Refetch with prepared statement
         $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->bind_param('i', $uid);
         $stmt->execute();
@@ -56,7 +54,7 @@ sidebar('analyst', 'edit-profile');
     <div class="flash-er">⚠ <?= e($err) ?></div>
 <?php endif; ?>
 
-<div class="card" style="max-width:480px">
+<div class="card" style="max-width:480px; margin: 0 auto;">
     <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px">
         <?php foreach ([['Email', $user['email']], ['Username', $user['username']], ['Role', $user['role']], ['Joined', substr($user['created_at'], 0, 10)]] as [$label, $value]): ?>
             <div style="display:flex;padding:5px 0">

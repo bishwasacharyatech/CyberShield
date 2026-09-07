@@ -8,7 +8,6 @@ $uid = $_SESSION['uid'];
 $msg = '';
 $err = '';
 
-// Fetch user with prepared statement
 $stmt = $db->prepare("SELECT password FROM users WHERE id = ?");
 $stmt->bind_param('i', $uid);
 $stmt->execute();
@@ -53,7 +52,7 @@ sidebar('user', 'change-password');
     <div class="flash-er">⚠ <?= e($err) ?></div>
 <?php endif; ?>
 
-<div class="card" style="max-width:420px">
+<div class="card" style="max-width:420px; margin: 0 auto;">
     <form method="POST">
         <div class="fg">
             <label class="fl">Current Password *</label>

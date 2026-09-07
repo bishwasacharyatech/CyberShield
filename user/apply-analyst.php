@@ -48,9 +48,9 @@ sidebar('user', 'apply-analyst');
     <div class="flash-er">⚠ <?= e($err) ?></div>
 <?php endif; ?>
 
-<div class="card" style="max-width:560px">
+<div class="card" style="max-width:560px; margin: 0 auto;">
     <?php if ($existingRequest && $existingRequest['status'] === 'pending'): ?>
-        <div class="ch"><span class="ct"><i class="ti ti-clock"></i> Request Pending</span></div>
+        <div class="ch"><span class="ct">⏳ Request Pending</span></div>
         <p style="color:var(--mu);font-size:13px;line-height:1.7">
             Your application is awaiting admin review. You'll be notified once a decision is made.
         </p>
@@ -60,7 +60,7 @@ sidebar('user', 'apply-analyst');
         </div>
     <?php else: ?>
         <?php if ($existingRequest && $existingRequest['status'] === 'rejected'): ?>
-            <div class="ch"><span class="ct"><i class="ti ti-x"></i> Previous Request Rejected</span></div>
+            <div class="ch"><span class="ct">✖ Previous Request Rejected</span></div>
             <p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:16px">
                 Your last application wasn't approved. You can submit a new request below.
             </p>

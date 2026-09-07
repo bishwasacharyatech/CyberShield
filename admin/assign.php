@@ -8,7 +8,6 @@ $id = (int) ($_GET['id'] ?? 0);
 $msg = '';
 $err = '';
 
-
 $stmt = $db->prepare("
     SELECT r.*, c.name AS cat_name, u.full_name AS uname
     FROM reports r
@@ -53,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $analystId = (int) ($_POST['analyst_id'] ?? 0);
     $severity  = $_POST['severity'] ?? '';
     $status    = $_POST['status'] ?? '';
+    $analystRemarks = trim($_POST['analyst_remarks'] ?? '');
 
     $validAnalystIds = array_column($analysts, 'id');
     $validSeverities = ['Critical', 'High', 'Medium', 'Low'];
@@ -64,15 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err = 'Invalid severity or status.';
     } else {
         $assignedTo = $analystId ?: null;
-        $stmt = $db->prepare('UPDATE reports SET assigned_to = ?, severity = ?, status = ?, updated_at = NOW() WHERE id = ?');
-        $stmt->bind_param('issi', $assignedTo, $severity, $status, $id);
+
+        $stmt = $db->prepare('UPDATE reports SET assigned_to = ?, severity = ?, status = ?, analyst_remarks = ?, updated_at = NOW() WHERE id = ?');
+        $stmt->bind_param('isssi', $assignedTo, $severity, $status, $analystRemarks, $id);
         $stmt->execute();
 
-        if ($analystId) {
+        // Log assignment if analyst changed
+        if ($analystId && $report['assigned_to'] != $analystId) {
             $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
             $adminId = $_SESSION['uid'];
             $action = 'Assigned';
-            $note = 'Assigned by Admin';
+            $note = "Assigned by Admin to Analyst ID $analystId";
             $timeline->bind_param('iiss', $id, $adminId, $action, $note);
             $timeline->execute();
 
@@ -80,11 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             addNotif($analystId, $id, "You have been assigned a new case: [{$report['ticket_no']}] {$report['title']}");
         }
 
+        // Log status/severity changes
+        if ($status != $report['status'] || $severity != $report['severity']) {
+            $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
+            $adminId = $_SESSION['uid'];
+            $action = 'Updated';
+            $note = "Status: {$report['status']} → {$status}, Severity: {$report['severity']} → {$severity}";
+            $timeline->bind_param('iiss', $id, $adminId, $action, $note);
+            $timeline->execute();
+        }
+
         $msg = 'Report updated!';
 
-        // ============================================================
-        // FIX 2: Use prepared statement for refresh query
-        // ============================================================
+        // Refresh report data
         $stmt = $db->prepare("
             SELECT r.*, c.name AS cat_name, u.full_name AS uname
             FROM reports r
@@ -96,18 +106,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $report = $stmt->get_result()->fetch_assoc();
 
+        // Refresh timeline
+        $timelineStmt = $db->prepare("
+            SELECT t.*, u.full_name AS un
+            FROM report_timeline t
+            LEFT JOIN users u ON t.user_id = u.id
+            WHERE t.report_id = ?
+            ORDER BY t.id ASC
+        ");
+        $timelineStmt->bind_param('i', $id);
         $timelineStmt->execute();
         $timeline = $timelineStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 }
 
 pageStart('Manage Report', 'admin');
-sidebar('admin', 'reports');
+sidebar('admin', 'assign');
 ?>
 
-<!-- ============================================================ -->
-<!-- HEADER WITH QUICK STATUS                                       -->
-<!-- ============================================================ -->
 <div style="margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
         <a href="<?= BASE_URL ?>/admin/reports.php" class="btn btn-gy btn-sm">← Back to Reports</a>
@@ -116,7 +132,6 @@ sidebar('admin', 'reports');
         <?= sevBadge($report['severity']) ?>
     </div>
 
-    <!-- Quick status bar -->
     <div style="display:flex;gap:20px;flex-wrap:wrap;background:var(--bg3);padding:10px 16px;border-radius:6px;border:1px solid var(--bd);font-size:13px">
         <span><strong style="color:var(--wh)">Reported By:</strong> <?= e($report['uname']) ?></span>
         <span><strong style="color:var(--wh)">Category:</strong> <?= e($report['cat_name'] ?? '—') ?></span>
@@ -140,11 +155,6 @@ sidebar('admin', 'reports');
     <div class="flash-er">⚠ <?= e($err) ?></div>
 <?php endif; ?>
 
-<!-- ============================================================ -->
-<!-- MAIN CONTENT: Full-width, clean cards                        -->
-<!-- ============================================================ -->
-
-<!-- 1. REPORT DESCRIPTION -->
 <div class="card">
     <div class="ch">
         <span class="ct">📝 Incident Description</span>
@@ -155,7 +165,6 @@ sidebar('admin', 'reports');
     </div>
 </div>
 
-<!-- 2. SUSPECT INFO (if any) -->
 <?php if ($report['suspect_info']): ?>
     <div class="card" style="border-left:3px solid var(--am)">
         <div class="ch"><span class="ct">⚠️ Suspect Information</span></div>
@@ -165,7 +174,6 @@ sidebar('admin', 'reports');
     </div>
 <?php endif; ?>
 
-<!-- 3. EVIDENCE FILES (if any) -->
 <?php if ($evidence): ?>
     <div class="card">
         <div class="ch"><span class="ct">📎 Evidence Files</span></div>
@@ -181,17 +189,15 @@ sidebar('admin', 'reports');
     </div>
 <?php endif; ?>
 
-<!-- 4. ANALYST REMARKS (if any) -->
 <?php if (!empty($report['analyst_remarks'])): ?>
     <div class="card" style="border-left:3px solid var(--pu)">
-        <div class="ch"><span class="ct">📝 Analyst Remarks</span></div>
+        <div class="ch"><span class="ct">📝 Current Analyst Remarks</span></div>
         <div style="font-size:13px;line-height:1.7;white-space:pre-wrap">
             <?= nl2br(e($report['analyst_remarks'])) ?>
         </div>
     </div>
 <?php endif; ?>
 
-<!-- 5. INVESTIGATION TIMELINE -->
 <div class="card">
     <div class="ch">
         <span class="ct">⏳ Investigation Timeline</span>
@@ -199,25 +205,18 @@ sidebar('admin', 'reports');
     </div>
     <?php if ($timeline): ?>
         <div style="position:relative;padding-left:24px">
-            <!-- Vertical line -->
             <div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--bd)"></div>
-
             <?php foreach ($timeline as $event): ?>
                 <?php
                 $colors = [
-                    'Submitted' => '#00d4ff',
-                    'Assigned' => '#8b5cf6',
-                    'Under Review' => '#f59e0b',
-                    'In Progress' => '#f97316',
-                    'Resolved' => '#00e676',
-                    'Closed' => '#64748b'
+                    'Submitted' => '#00d4ff', 'Assigned' => '#8b5cf6',
+                    'Under Review' => '#f59e0b', 'In Progress' => '#f97316',
+                    'Resolved' => '#00e676', 'Closed' => '#64748b', 'Updated' => '#f472b6'
                 ];
                 $color = $colors[$event['action']] ?? '#4a6a88';
                 ?>
                 <div style="position:relative;padding-bottom:16px;padding-left:16px;border-left:2px solid <?= $color ?>33">
-                    <!-- Dot -->
                     <div style="position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:<?= $color ?>;border:2px solid var(--bg2)"></div>
-
                     <div style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline">
                         <span style="font-weight:600;font-size:14px;color:var(--wh)"><?= e($event['action']) ?></span>
                         <span style="font-size:12px;color:var(--mu);font-family:monospace"><?= e($event['created_at']) ?></span>
@@ -236,7 +235,6 @@ sidebar('admin', 'reports');
     <?php endif; ?>
 </div>
 
-<!-- 6. ASSIGN & UPDATE FORM -->
 <div class="card">
     <div class="ch"><span class="ct">✅ Assign & Update</span></div>
     <form method="POST" style="max-width:480px">
@@ -266,6 +264,10 @@ sidebar('admin', 'reports');
                     <option <?= $report['status'] === $s ? 'selected' : '' ?>><?= $s ?></option>
                 <?php endforeach; ?>
             </select>
+        </div>
+        <div class="fg">
+            <label class="fl">Analyst Remarks</label>
+            <textarea name="analyst_remarks" class="fi" style="min-height:100px" placeholder="Add remarks for the analyst or update investigation notes..."><?= e($report['analyst_remarks'] ?? '') ?></textarea>
         </div>
         <button type="submit" class="btn btn-cy">💾 Save Changes</button>
     </form>

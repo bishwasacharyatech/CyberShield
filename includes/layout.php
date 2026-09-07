@@ -1,6 +1,6 @@
 <?php
 
-function pageStart($title, $role)
+function pageStart(string $title, string $role): void
 {
     $rc = ['admin' => '#e0333f', 'analyst' => '#7c6ff2', 'user' => '#3b6fe8'][$role] ?? '#3b6fe8';
     $fn = e($_SESSION['fname'] ?? '');
@@ -36,7 +36,7 @@ function pageStart($title, $role)
     <div class="overlay" id="ovEl" onclick="document.getElementById(\'sbEl\').classList.remove(\'open\');this.classList.remove(\'show\')"></div>
     <div class="wrap">';
 }
-function sidebar($role, $active = '')
+function sidebar(string $role, string $active = ''): void
 {
     $base = BASE_URL;
     $pendingAnalystReqs = ($role === 'admin') ? getPendingAnalystRequests() : 0;
@@ -65,10 +65,6 @@ function sidebar($role, $active = '')
             ['assign', 'Assign Reports', 'ti-user-pin'],
             ['categories', 'Categories', 'ti-category'],
             ['audit', 'Audit Trail', 'ti-history'],
-            ['siem/dashboard', 'SIEM Dashboard', 'ti-shield'],
-            ['siem/logs', 'SIEM Logs', 'ti-terminal-2'],
-            ['siem/alerts', 'SIEM Alerts', 'ti-bell'],
-            ['siem/rules', 'Detection Rules', 'ti-settings-automation'],
         ]
     ];
 
@@ -91,7 +87,7 @@ function sidebar($role, $active = '')
     <div class="content">';
 }
 
-function pageEnd()
+function pageEnd(): void
 {
     echo '</div></div>
     <footer class="global-footer" style="margin-top:30px; border-top:1px solid var(--bd); padding:16px; text-align:center; font-size:0.8rem; color:var(--mu);">
