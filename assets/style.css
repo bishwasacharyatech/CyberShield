@@ -62,10 +62,8 @@ img {
 }
 
 /* ============================================================
-   SECTION 1 – LANDING PAGE (landing.php)
+   SECTION 1 – LANDING PAGE
    ============================================================ */
-
-/* .nav = Navigation bar (logo + sign in/register buttons) */
 .nav {
     display: flex;
     flex-wrap: nowrap;
@@ -75,24 +73,20 @@ img {
     gap: 8px;
 }
 
-/* .logo = CyberShield brand logo */
 .logo {
     font-size: 1.4rem;
     font-weight: 800;
     flex-shrink: 0;
 }
 
-/* .c-cyber = Cyber part of logo (red) */
 .c-cyber {
     color: var(--re);
 }
 
-/* .c-shield = Shield part of logo (blue) */
 .c-shield {
     color: var(--cy);
 }
 
-/* .nav-r = Navigation right side (buttons container) */
 .nav-r {
     margin-left: auto;
     display: flex;
@@ -101,7 +95,6 @@ img {
     flex-shrink: 0;
 }
 
-/* .nbtn = Navigation button (general) */
 .nbtn {
     display: inline-block;
     padding: 8px 18px;
@@ -114,13 +107,11 @@ img {
     white-space: nowrap;
 }
 
-/* .nbtn-fill = Filled navigation button (primary action) */
 .nbtn-fill {
     background: var(--cy);
     color: #fff;
 }
 
-/* .nbtn-line = Outlined navigation button (secondary action) */
 .nbtn-line {
     background: var(--bg3);
     color: var(--text);
@@ -131,7 +122,6 @@ img {
     opacity: 0.85;
 }
 
-/* .hero = Hero section (main landing banner) */
 .hero {
     text-align: center;
     padding: 60px 20px 40px;
@@ -159,7 +149,6 @@ img {
     line-height: 1.7;
 }
 
-/* .hero-btns = Hero buttons container */
 .hero-btns {
     display: flex;
     flex-wrap: wrap;
@@ -172,21 +161,18 @@ img {
     font-size: 1rem;
 }
 
-/* .feat-wrap = Features wrapper (container) */
 .feat-wrap {
     max-width: 960px;
     margin: 0 auto;
     padding: 20px 20px 50px;
 }
 
-/* .feat-grid = Features grid (3 columns) */
 .feat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
 }
 
-/* .feat = Single feature card */
 .feat {
     background: var(--bg2);
     border: 1px solid var(--bd);
@@ -195,7 +181,6 @@ img {
     text-align: center;
 }
 
-/* .ic = Icon inside feature card */
 .feat .ic {
     font-size: 2.2rem;
     margin-bottom: 8px;
@@ -213,14 +198,12 @@ img {
     line-height: 1.6;
 }
 
-/* .steps = How It Works section */
 .steps {
     background: var(--bg2);
     border-top: 1px solid var(--bd);
     padding: 50px 20px;
 }
 
-/* .steps-in = Steps container (inner) */
 .steps-in {
     max-width: 800px;
     margin: 0 auto;
@@ -233,19 +216,16 @@ img {
     margin-bottom: 30px;
 }
 
-/* .step-row = Steps row (3 columns) */
 .step-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 24px;
 }
 
-/* .step = Single step card */
 .step {
     text-align: center;
 }
 
-/* .step-num = Step number circle */
 .step-num {
     width: 44px;
     height: 44px;
@@ -273,7 +253,6 @@ img {
     line-height: 1.6;
 }
 
-/* .global-footer = Landing page footer */
 .global-footer {
     text-align: center;
     padding: 24px;
@@ -284,10 +263,8 @@ img {
 }
 
 /* ============================================================
-   SECTION 2 – LOGIN PAGE (login.php)
+   SECTION 2 – LOGIN PAGE
    ============================================================ */
-
-/* .auth-body = Authentication page body container */
 .auth-body {
     display: flex;
     justify-content: center;
@@ -296,7 +273,6 @@ img {
     padding: 20px;
 }
 
-/* .auth-card = Authentication card (login/register form container) */
 .auth-card {
     background: var(--bg2);
     border: 1px solid var(--bd);
@@ -306,19 +282,16 @@ img {
     max-width: 440px;
 }
 
-/* .brand-header = Brand logo header */
 .brand-header {
     text-align: center;
     margin-bottom: 24px;
 }
 
-/* .brand-logo = Brand logo text */
 .brand-logo {
     font-size: 1.8rem;
     font-weight: 800;
 }
 
-/* .brand-subtitle = Brand subtitle (e.g., "Authorized Personnel Only") */
 .brand-subtitle {
     color: var(--mu);
     font-size: 0.75rem;
@@ -326,7 +299,6 @@ img {
     margin-top: 4px;
 }
 
-/* .alert-error = Error alert message */
 .alert-error {
     background: rgba(248, 81, 73, 0.1);
     border: 1px solid var(--re);
@@ -337,7 +309,6 @@ img {
     margin-bottom: 16px;
 }
 
-/* .form-group = Form field group container */
 .form-group {
     margin-bottom: 16px;
 }
@@ -370,12 +341,10 @@ input:focus {
     box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
 }
 
-/* .password-group = Password field group (with toggle button) */
 .password-group input {
     padding-right: 45px;
 }
 
-/* #togglePassword = Password visibility toggle button */
 #togglePassword {
     background: none;
     border: none;
@@ -384,7 +353,6 @@ input:focus {
     font-size: 1.2rem;
 }
 
-/* .btn-submit = Form submit button */
 .btn-submit {
     width: 100%;
     padding: 12px;
@@ -402,7 +370,6 @@ input:focus {
     opacity: 0.9;
 }
 
-/* .divider = Horizontal divider line */
 .divider {
     border: 0;
     height: 1px;
@@ -410,7 +377,6 @@ input:focus {
     margin: 20px 0;
 }
 
-/* .auth-footer = Authentication page footer (links) */
 .auth-footer {
     text-align: center;
     font-size: 0.85rem;
@@ -426,22 +392,18 @@ input:focus {
 }
 
 /* ============================================================
-   SECTION 3 – REGISTER PAGE (register.php)
+   SECTION 3 – REGISTER PAGE
    ============================================================ */
-
-/* .form-grid = Register form 2-column grid */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-/* .full-width = Form field that spans both columns */
 .form-grid .full-width {
     grid-column: span 2;
 }
 
-/* .role-box = Analyst role checkbox container */
 .role-box {
     background: var(--bg3);
     border: 1px solid var(--bd);
@@ -450,7 +412,6 @@ input:focus {
     margin: 4px 0 14px;
 }
 
-/* .role-option = Analyst role checkbox label */
 .role-option {
     display: flex;
     align-items: center;
@@ -471,7 +432,6 @@ input:focus {
     color: var(--pu);
 }
 
-/* .terms-option = Terms and conditions checkbox */
 .terms-option {
     display: flex;
     align-items: center;
@@ -491,10 +451,8 @@ input:focus {
 }
 
 /* ============================================================
-   SECTION 4 – TERMS PAGE (terms.php)
+   SECTION 4 – TERMS PAGE
    ============================================================ */
-
-/* .container = Terms page main container */
 .container {
     max-width: 720px;
     margin: 30px auto;
@@ -504,7 +462,6 @@ input:focus {
     border-radius: 12px;
 }
 
-/* .terms-header = Terms page header section */
 .terms-header {
     background: var(--bg3);
     border-radius: 12px;
@@ -526,7 +483,6 @@ input:focus {
     font-size: 13px;
 }
 
-/* .term-section = Individual terms section */
 .term-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -568,7 +524,6 @@ input:focus {
     margin-bottom: 3px;
 }
 
-/* .back-btn = Back button on terms page */
 .back-btn {
     display: inline-flex;
     align-items: center;
@@ -591,10 +546,8 @@ input:focus {
 }
 
 /* ============================================================
-   SECTION 5 – DASHBOARD LAYOUT (shared by admin, analyst, user)
+   SECTION 5 – DASHBOARD LAYOUT (with sidebar height fix)
    ============================================================ */
-
-/* .topbar = Dashboard top navigation bar */
 .topbar {
     height: 56px;
     background: var(--bg2);
@@ -608,7 +561,6 @@ input:focus {
     z-index: 50;
 }
 
-/* .hamb = Hamburger menu button (mobile sidebar toggle) */
 .hamb {
     display: none;
     background: none;
@@ -619,7 +571,6 @@ input:focus {
     padding: 0 4px;
 }
 
-/* .rpill = Role pill badge (admin/analyst/user) */
 .rpill {
     padding: 2px 10px;
     border-radius: 4px;
@@ -631,7 +582,6 @@ input:focus {
     border: 1px solid var(--re)33;
 }
 
-/* .dot = Status dot (green = online) */
 .dot {
     width: 8px;
     height: 8px;
@@ -640,7 +590,6 @@ input:focus {
     display: inline-block;
 }
 
-/* .ml = Margin left (pushes items to the right) */
 .ml {
     margin-left: auto;
     display: flex;
@@ -649,7 +598,6 @@ input:focus {
     flex-wrap: wrap;
 }
 
-/* .notif-btn = Notification button */
 .notif-btn {
     position: relative;
     background: var(--bg3);
@@ -664,27 +612,30 @@ input:focus {
     gap: 4px;
 }
 
-/* .nbadge = Notification badge (unread count) */
 .nbadge {
     position: absolute;
     top: -6px;
     right: -6px;
     background: var(--re);
     color: #fff;
-    border-radius: 4px;
+    border-radius: 50%;
     font-size: 0.6rem;
     font-weight: 700;
-    padding: 0 5px;
+    padding: 0;
     min-width: 16px;
+    height: 16px;
+    line-height: 16px;
     text-align: center;
 }
 
-/* .wrap = Dashboard wrapper (sidebar + content) */
+/* ─── Sidebar height fix ─── */
 .wrap {
     display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - 56px);
+    /* subtract topbar height */
 }
 
-/* .sidebar = Dashboard sidebar navigation */
 .sidebar {
     width: 220px;
     background: var(--bg2);
@@ -693,10 +644,10 @@ input:focus {
     display: flex;
     flex-direction: column;
     padding: 10px 0;
-    transition: transform 0.25s ease;
+    min-height: 100%;
+    height: auto;
 }
 
-/* .sb-sec = Sidebar section header */
 .sb-sec {
     font-size: 0.6rem;
     font-family: monospace;
@@ -705,7 +656,6 @@ input:focus {
     text-transform: uppercase;
 }
 
-/* .sb-a = Sidebar link item */
 .sb-a {
     display: flex;
     align-items: center;
@@ -715,7 +665,7 @@ input:focus {
     font-size: 0.9rem;
     font-weight: 500;
     border-left: 2px solid transparent;
-    transition: 0.15s;
+    transition: background 0.15s, border-color 0.15s;
 }
 
 .sb-a:hover {
@@ -731,14 +681,13 @@ input:focus {
     font-weight: 600;
 }
 
-/* .sb-bot = Sidebar bottom section (logout) */
 .sb-bot {
     margin-top: auto;
     padding: 10px 0;
     border-top: 1px solid var(--bd);
 }
 
-/* .overlay = Mobile sidebar overlay (darkens background) */
+/* Overlay – hidden by default, shown only when .show is toggled */
 .overlay {
     display: none;
     position: fixed;
@@ -751,7 +700,6 @@ input:focus {
     display: block;
 }
 
-/* .content = Main dashboard content area */
 .content {
     flex: 1;
     padding: 20px;
@@ -762,17 +710,20 @@ input:focus {
 /* ============================================================
    SECTION 6 – CARDS, METRICS, GRID SYSTEMS
    ============================================================ */
-
-/* .card = Content card container */
 .card {
     background: var(--bg2);
     border: 1px solid var(--bd);
     border-radius: 10px;
     padding: 16px 18px;
     margin-bottom: 16px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* .ch = Card header (title + action button) */
+.card:hover {
+    border-color: var(--cy);
+    box-shadow: 0 0 0 1px var(--cy)18, 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .ch {
     display: flex;
     align-items: center;
@@ -782,7 +733,6 @@ input:focus {
     gap: 8px;
 }
 
-/* .ct = Card title text */
 .ct {
     font-size: 0.95rem;
     font-weight: 600;
@@ -797,24 +747,20 @@ input:focus {
     color: var(--mu);
 }
 
-/* .grid = Flexible grid container */
 .grid {
     display: grid;
     gap: 14px;
     margin-bottom: 16px;
 }
 
-/* .g4 = 4-column grid (responsive) */
 .g4 {
     grid-template-columns: 1fr;
 }
 
-/* .g3 = 3-column grid (responsive) */
 .g3 {
     grid-template-columns: 1fr;
 }
 
-/* .gr-23 = 2/3 and 1/3 grid layout */
 .gr-23,
 .gr-32,
 .gr-22 {
@@ -823,56 +769,54 @@ input:focus {
     grid-template-columns: 1fr;
 }
 
-/* .metric = Metric/statistics card */
 .metric {
     background: var(--bg3);
     border: 1px solid var(--bd);
     border-radius: 6px;
     padding: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-/* .m-lbl = Metric label */
+.metric:hover {
+    transform: translateY(-2px);
+    border-color: var(--cy);
+    box-shadow: 0 0 0 1px var(--cy)18;
+}
+
 .m-lbl {
     font-size: 0.75rem;
     color: var(--mu);
     margin-bottom: 2px;
 }
 
-/* .m-val = Metric value (large number) */
 .m-val {
     font-size: 1.8rem;
     font-weight: 800;
     line-height: 1.2;
 }
 
-/* .m-sub = Metric subtitle */
 .m-sub {
     font-size: 0.7rem;
     color: var(--mu);
     margin-top: 2px;
 }
 
-/* .m-cy = Cyan metric (primary) */
 .m-cy .m-val {
     color: var(--cy);
 }
 
-/* .m-am = Amber metric (warning) */
 .m-am .m-val {
     color: var(--am);
 }
 
-/* .m-gr = Green metric (success) */
 .m-gr .m-val {
     color: var(--gr);
 }
 
-/* .m-pu = Purple metric (analyst) */
 .m-pu .m-val {
     color: var(--pu);
 }
 
-/* .m-re = Red metric (danger) */
 .m-re .m-val {
     color: var(--re);
 }
@@ -880,14 +824,12 @@ input:focus {
 /* ============================================================
    SECTION 7 – BUTTONS (all variants)
    ============================================================ */
-
-/* .btn = General button */
 .btn {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 2rem;
     border: none;
     cursor: pointer;
     font-family: inherit;
@@ -895,47 +837,41 @@ input:focus {
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    transition: 0.2s;
+    transition: background 0.2s, opacity 0.2s, border 0.2s;
 }
 
 .btn:hover {
     opacity: 0.85;
 }
 
-/* .btn-cy = Primary cyan button */
 .btn-cy {
     background: var(--cy);
     color: #fff;
 }
 
-/* .btn-gy = Secondary gray button */
 .btn-gy {
     background: var(--bg3);
     color: var(--text);
     border: 1px solid var(--bd);
 }
 
-/* .btn-sm = Small button size */
 .btn-sm {
     padding: 4px 10px;
     font-size: 0.75rem;
 }
 
-/* .btn-re = Red/danger button */
 .btn-re {
     background: var(--re)18;
     color: var(--re);
     border: 1px solid var(--re)33;
 }
 
-/* .btn-gr = Green/success button */
 .btn-gr {
     background: var(--gr)12;
     color: var(--gr);
     border: 1px solid var(--gr)25;
 }
 
-/* .btn-pu = Purple button */
 .btn-pu {
     background: var(--pu)12;
     color: var(--pu);
@@ -945,13 +881,10 @@ input:focus {
 /* ============================================================
    SECTION 8 – FORMS (edit, admin, profile)
    ============================================================ */
-
-/* .fg = Form group (field container) */
 .fg {
     margin-bottom: 14px;
 }
 
-/* .fl = Form label */
 .fl {
     font-size: 0.8rem;
     color: var(--mu);
@@ -959,7 +892,6 @@ input:focus {
     margin-bottom: 4px;
 }
 
-/* .fi = Form input (text, select, textarea) */
 .fi {
     width: 100%;
     background: var(--bg3);
@@ -986,10 +918,8 @@ textarea.fi {
 }
 
 /* ============================================================
-   SECTION 9 – FLASH MESSAGES (success / error)
+   SECTION 9 – FLASH MESSAGES
    ============================================================ */
-
-/* .flash-ok = Success flash message (green) */
 .flash-ok {
     background: var(--gr)08;
     border: 1px solid var(--gr)25;
@@ -1000,7 +930,6 @@ textarea.fi {
     font-size: 0.9rem;
 }
 
-/* .flash-er = Error flash message (red) */
 .flash-er {
     background: var(--re)08;
     border: 1px solid var(--re)25;
@@ -1014,27 +943,34 @@ textarea.fi {
 /* ============================================================
    SECTION 10 – SEARCH BAR (admin reports, users, etc.)
    ============================================================ */
-
-/* .srchbar = Search bar container */
 .srchbar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
     margin-bottom: 14px;
     align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -webkit-overflow-scrolling: touch;
 }
 
-/* .srch-i = Search input field */
+.srchbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Chrome/Safari */
 .srch-i {
     background: var(--bg3);
     border: 1px solid var(--bd);
-    border-radius: 8px;
+    border-radius: 2rem;
     padding: 8px 12px;
     color: var(--text);
     font-size: 0.9rem;
     outline: none;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-width: 120px;
+    white-space: nowrap;
 }
 
 .srch-i:focus {
@@ -1043,10 +979,8 @@ textarea.fi {
 }
 
 /* ============================================================
-   SECTION 11 – TABLES (admin reports, users, audit, etc.)
+   SECTION 11 – TABLES
    ============================================================ */
-
-/* .tw = Table wrapper (enables horizontal scroll) */
 .tw {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -1064,7 +998,7 @@ th {
     text-align: left;
     font-size: 0.7rem;
     color: var(--mu);
-    border-bottom: 1px solid var(--bd);
+    border-bottom: 2px solid var(--bd);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -1076,16 +1010,24 @@ td {
     vertical-align: middle;
 }
 
-/* ============================================================
-   SECTION 12 – TIMELINE (view-report.php, investigate.php)
-   ============================================================ */
+table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
 
-/* .tl-item = Timeline item (single event) */
+/* ============================================================
+   SECTION 12 – TIMELINE
+   ============================================================ */
 .tl-item {
     display: flex;
     gap: 10px;
-    padding-bottom: 12px;
+    padding: 0.8rem 0.4rem;
+    border-radius: 0.6rem;
     position: relative;
+    transition: background 0.15s;
+}
+
+.tl-item:hover {
+    background: var(--bg3);
 }
 
 .tl-item:not(:last-child)::before {
@@ -1098,7 +1040,6 @@ td {
     background: var(--bd);
 }
 
-/* .tl-dot = Timeline dot marker */
 .tl-dot {
     width: 28px;
     height: 28px;
@@ -1110,29 +1051,26 @@ td {
 }
 
 /* ============================================================
-   SECTION 13 – PAGE TITLES & SUBTITLES
+   SECTION 13 – PAGE TITLES
    ============================================================ */
-
-/* .pg-title = Page title (large heading) */
 .pg-title {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--wh);
     margin-bottom: 2px;
+    letter-spacing: -0.02em;
 }
 
-/* .pg-sub = Page subtitle (small description) */
 .pg-sub {
     font-size: 0.9rem;
     color: var(--mu);
     margin-bottom: 16px;
+    font-weight: 400;
 }
 
 /* ============================================================
    SECTION 14 – RESPONSIVE BREAKPOINTS
    ============================================================ */
-
-/* Tablets and small laptops (≥ 768px) */
 @media (min-width: 768px) {
     .g4 {
         grid-template-columns: repeat(2, 1fr);
@@ -1155,7 +1093,6 @@ td {
     }
 }
 
-/* Desktops (≥ 1024px) */
 @media (min-width: 1024px) {
     .g4 {
         grid-template-columns: repeat(4, 1fr);
@@ -1170,7 +1107,7 @@ td {
     }
 }
 
-/* Sidebar toggle (≤ 768px) */
+/* Sidebar toggle (≤ 768px) – overlay is already hidden by default */
 @media (max-width: 768px) {
     .hamb {
         display: block;
@@ -1190,13 +1127,15 @@ td {
     .sidebar.open {
         left: 0;
     }
+
     .content {
         padding: 14px;
     }
 }
 
-/* Phones (≤ 480px) */
+/* Phones (≤ 480px) – top‑bar fixes and responsive grid */
 @media (max-width: 480px) {
+
     /* Landing navigation shrink */
     .nav {
         padding: 6px 10px;
@@ -1234,7 +1173,6 @@ td {
         font-size: 0.85rem;
     }
 
-    /* Authentication pages */
     .auth-card {
         padding: 20px;
     }
@@ -1243,7 +1181,6 @@ td {
         font-size: 1.4rem;
     }
 
-    /* Register grid */
     .form-grid {
         grid-template-columns: 1fr !important;
     }
@@ -1252,35 +1189,54 @@ td {
         grid-column: span 1 !important;
     }
 
-    /* Dashboard top bar */
+    /* Dashboard top bar – keep items on one line */
     .topbar {
         height: 48px;
-        padding: 0 10px;
+        padding: 0 6px;
+        gap: 4px;
     }
 
     .topbar .logo {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
+        flex-shrink: 0;
     }
 
     .topbar .rpill,
     .topbar .dot {
-        display: none;
+        display: none !important;
     }
 
-    .ml .btn-sm {
-        padding: 2px 8px;
-        font-size: 0.7rem;
+    .topbar .ml {
+        flex-wrap: nowrap !important;
+        gap: 3px !important;
+        justify-content: flex-end;
+        flex-shrink: 1;
+        min-width: 0;
+        max-width: 75%;
     }
 
-    .notif-btn {
-        padding: 2px 8px;
-        font-size: 0.75rem;
-    }
-
-    .nbadge {
+    .topbar .ml .notif-btn {
         font-size: 0.5rem;
-        padding: 0 4px;
-        min-width: 14px;
+        padding: 1px 4px;
+        flex-shrink: 0;
+    }
+
+    .topbar .ml .btn-sm {
+        font-size: 0.45rem;
+        padding: 1px 3px;
+        flex-shrink: 0;
+    }
+
+    .topbar .ml span {
+        font-size: 0.45rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60px;
+    }
+
+    .topbar .ml strong {
+        font-size: 0.5rem;
     }
 
     /* Content */
@@ -1300,15 +1256,11 @@ td {
         font-size: 1.4rem;
     }
 
-    /* Search bar */
-    .srchbar .srch-i,
-    .srchbar .btn {
-        flex: 1 1 100%;
-        min-width: 0;
-    }
-
-    .srchbar {
-        gap: 6px;
+    /* Search bar – already scrollable, but reduce input size */
+    .srch-i {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        min-width: 90px;
     }
 
     /* Tables */
@@ -1332,4 +1284,40 @@ td {
         padding: 16px;
         margin: 12px;
     }
-} 
+}
+
+/* ─── Additional enhancements: grid auto-fit for metrics ─── */
+@media (min-width: 480px) {
+    .grid.g4 {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .grid.g4 {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid.g4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ─── Quick action cards hover effect ─── */
+a .card {
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+a .card:hover {
+    transform: scale(1.02);
+    border-color: var(--cy);
+}
+
+/* ─── Global footer spacing ─── */
+.global-footer {
+    border-top: 1px solid var(--bd);
+    padding: 2rem 1.6rem;
+    margin-top: 3rem;
+}
