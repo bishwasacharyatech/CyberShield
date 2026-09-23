@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$fullName || !$phone) {
         $err = 'All fields are required.';
-    } elseif (!preg_match('/^[A-Za-z ]+$/', $fullName)) {
-        $err = 'Full name should only contain letters and spaces.';
+    } elseif (!preg_match('/^[A-Za-z_ ]{3,}$/', $fullName)) {
+        $err = 'Full name should only contain letters and spaces (min 3).';
     } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
         $err = 'Phone must be exactly 10 digits.';
     } else {
@@ -66,11 +66,13 @@ sidebar('user', 'edit-profile');
     <form method="POST">
         <div class="fg">
             <label class="fl">Full Name *</label>
-            <input type="text" name="full_name" class="fi" value="<?= e($user['full_name']) ?>" required>
+            <input type="text" name="full_name" class="fi" value="<?= e($user['full_name']) ?>" required 
+                   pattern="[A-Za-z_ ]{3,}">
         </div>
         <div class="fg">
             <label class="fl">Phone * (10 digits)</label>
-            <input type="tel" name="phone" class="fi" value="<?= e($user['phone'] ?? '') ?>" required>
+            <input type="text" inputmode="numeric" name="phone" class="fi" value="<?= e($user['phone'] ?? '') ?>" required 
+                   pattern="[0-9]{10}">
         </div>
         <button type="submit" class="btn btn-cy">💾 Save Changes</button>
     </form>
