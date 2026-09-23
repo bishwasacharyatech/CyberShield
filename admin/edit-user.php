@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$name || !$email || !$phone) {
             $err = 'All fields are required.';
-        } elseif (!preg_match('/^[A-Za-z ]+$/', $name)) {
-            $err = 'Full name should only contain letters and spaces.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $err = 'Invalid email address.';
+        } elseif (!preg_match('/^[A-Za-z_ ]{3,}$/', $name)) {
+            $err = 'Full name should only contain letters and spaces (min 3).';
+        } elseif (!preg_match('/^[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}$/', $email)) {
+            $err = 'Email must be like User123@gmail.com';
         } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
             $err = 'Phone must be 10 digits.';
         } elseif ($id == 1 && $role !== 'admin') {
@@ -106,15 +106,18 @@ sidebar('admin', 'users');
             <input type="hidden" name="update" value="1">
             <div class="fg">
                 <label class="fl">Full Name *</label>
-                <input type="text" name="full_name" class="fi" value="<?= e($user['full_name']) ?>" required>
+                <input type="text" name="full_name" class="fi" value="<?= e($user['full_name']) ?>" required 
+                       pattern="[A-Za-z_ ]{3,}">
             </div>
             <div class="fg">
                 <label class="fl">Email *</label>
-                <input type="email" name="email" class="fi" value="<?= e($user['email']) ?>" required>
+                <input type="text" inputmode="email" name="email" class="fi" value="<?= e($user['email']) ?>" required 
+                       pattern="[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}">
             </div>
             <div class="fg">
                 <label class="fl">Phone * (10 digits)</label>
-                <input type="tel" name="phone" class="fi" value="<?= e($user['phone'] ?? '') ?>" required>
+                <input type="text" inputmode="numeric" name="phone" class="fi" value="<?= e($user['phone'] ?? '') ?>" required 
+                       pattern="[0-9]{10}">
             </div>
             <div class="fg">
                 <label class="fl">Role</label>
