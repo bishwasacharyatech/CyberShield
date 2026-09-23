@@ -10,16 +10,16 @@ $success = '';
 
 $categories = $db->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name")->fetch_all(MYSQLI_ASSOC);
 
-$title = $severity = $description = $incidentDate = '';
+$title = $description = $incidentDate = '';
 $extraFields = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title         = trim($_POST['title'] ?? '');
-    $categoryId    = (int) ($_POST['category_id'] ?? 0);
-    $severity      = $_POST['severity'] ?? 'Medium';
-    $description   = trim($_POST['description'] ?? '');
-    $incidentDate  = $_POST['incident_date'] ?? '';
-    $extraFields   = $_POST['extra'] ?? [];
+    $title = trim($_POST['title'] ?? '');
+    $categoryId = (int) ($_POST['category_id'] ?? 0);
+    $severity = 'Medium';
+    $description = trim($_POST['description'] ?? '');
+    $incidentDate = $_POST['incident_date'] ?? '';
+    $extraFields = $_POST['extra'] ?? [];
 
     $validCategoryIds = array_column($categories, 'id');
 
@@ -40,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$dateValid) {
         $error = 'Incident date must be a valid date and cannot be in the future.';
     } else {
-        
         // FILE VALIDATION (before any DB insert)
         $fileError = '';
         $storedName = null;
@@ -51,22 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $validation = validateUpload($file);
 
             if ($validation['ok']) {
-                // File is valid, prepare to upload later
                 $storedName = uniqid('ev_', true) . '.' . $validation['ext'];
             } else {
-                // File is invalid — block submission
                 $uploadOk = false;
                 $fileError = $validation['err'];
             }
         }
 
-        // If file is invalid, stop here and set error
         if (!$uploadOk) {
             $error = 'Invalid evidence file: ' . $fileError;
         } else {
-            
-            // ALL VALID — proceed with report insertion
-            
             $ticketNo = genTicket();
 
             // Build suspect info from extra fields
@@ -112,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Notify admins
                 $admins = $db->query("SELECT id FROM users WHERE role = 'admin'")->fetch_all(MYSQLI_ASSOC);
                 foreach ($admins as $admin) {
-                    addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs assignment");
+                    addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs review");
                 }
 
                 $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>. <a href='" . BASE_URL . "/user/my-reports.php'>Track it →</a>";
@@ -142,10 +135,10 @@ sidebar('user', 'report');
     <form method="POST" enctype="multipart/form-data">
         <div class="fg">
             <label class="fl">Incident Title *</label>
-            <input type="text" name="title" class="fi" placeholder="Brief description of the incident" required value="<?= e($_POST['title'] ?? '') ?>">
+            <input type="text" name="title" class="fi" placeholder="Brief description of the incident" required
+                value="<?= e($_POST['title'] ?? '') ?>">
         </div>
-
-        <div class="grid g3">
+        <div class="grid gr-22">
             <div class="fg">
                 <label class="fl">Category *</label>
                 <select name="category_id" id="categorySelect" class="fi" required>
@@ -159,31 +152,25 @@ sidebar('user', 'report');
             </div>
 
             <div class="fg">
-                <label class="fl">Severity *</label>
-                <select name="severity" class="fi">
-                    <?php foreach (['Critical', 'High', 'Medium', 'Low'] as $sev): ?>
-                        <option <?= ($_POST['severity'] ?? 'Medium') === $sev ? 'selected' : '' ?>><?= $sev ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="fg">
                 <label class="fl">Incident Date *</label>
-                <input type="date" name="incident_date" class="fi" max="<?= date('Y-m-d') ?>" required value="<?= e($_POST['incident_date'] ?? date('Y-m-d')) ?>">
+                <input type="date" name="incident_date" class="fi" max="<?= date('Y-m-d') ?>" required
+                    value="<?= e($_POST['incident_date'] ?? date('Y-m-d')) ?>">
             </div>
         </div>
 
-        <!-- Dynamic fields container – now uses responsive class -->
         <div id="dynamicFields"></div>
 
         <div class="fg">
             <label class="fl">Full Incident Description *</label>
-            <textarea name="description" class="fi" placeholder="Describe the whole incident: what happened, how it occurred, who was involved, what was the impact..." required style="min-height:130px"><?= e($_POST['description'] ?? '') ?></textarea>
+            <textarea name="description" class="fi"
+                placeholder="Describe the whole incident: what happened, how it occurred, who was involved, what was the impact..."
+                required style="min-height:130px"><?= e($_POST['description'] ?? '') ?></textarea>
         </div>
 
         <div class="fg">
             <label class="fl">Evidence File (optional — max 5MB)</label>
-            <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx">
+            <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer"
+                accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx">
             <div style="font-size:11px;color:var(--mu);margin-top:4px">
                 Allowed: JPG, PNG, PDF, TXT, DOC, DOCX — Max 5MB
             </div>
@@ -269,7 +256,6 @@ sidebar('user', 'report');
             return;
         }
 
-        // Use the responsive .gr-22 class (2 columns, stacks on mobile)
         let html = `<div style="background:var(--bg3);border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid var(--bd)">
                         <div style="font-size:12px;color:var(--mu);margin-bottom:10px;font-weight:600">📋 Additional Details</div>
                         <div class="gr-22">`;
