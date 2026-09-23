@@ -62,13 +62,19 @@ auditLog('VIEW', 'Export Report', "Exported report #{$report['ticket_no']} as HT
             .no-print {
                 display: none !important;
             }
+
+            body>div {
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div style="max-width:900px;margin:20px auto;padding:0 20px">
+    <div
+        style="max-width:900px;margin:20px auto;padding:25px 35px;border:1px solid var(--bd);border-radius:12px;background:var(--bg2);box-shadow:0 4px 20px rgba(0,0,0,0.3)">
 
         <div class="no-print" style="display:flex;justify-content:space-between;gap:12px;margin-bottom:16px">
             <a href="javascript:history.back()" class="btn btn-gy">← Back</a>
