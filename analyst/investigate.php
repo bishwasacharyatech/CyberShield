@@ -119,9 +119,7 @@ sidebar('analyst', 'assigned');
             <?php endif; ?>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- 🔥 DYNAMIC UPDATE STATUS & REMARKS SECTION                    -->
-        <!-- ============================================================ -->
+        <!-- DYNAMIC UPDATE STATUS & REMARKS SECTION                    -->
         <div class="card">
             <?php
             // Define dynamic title & icon based on current status
@@ -182,9 +180,7 @@ sidebar('analyst', 'assigned');
                 </form>
             <?php endif; ?>
         </div>
-        <!-- ============================================================ -->
         <!-- END DYNAMIC SECTION                                           -->
-        <!-- ============================================================ -->
     </div>
 
     <div class="card">
@@ -229,7 +225,7 @@ sidebar('analyst', 'assigned');
 </div>
 
 <div style="text-align:center;margin-top:20px">
-    <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" class="btn btn-gr">⬇ Download Report as pdf</a>
+    <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" target="_blank" class="btn btn-gr">📄 View / Print Report</a>
 </div>
 
 <?php pageEnd(); ?>
