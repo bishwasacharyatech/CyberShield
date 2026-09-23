@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Basic validation
     if (!$title || !$categoryId || !$description || !$incidentDate) {
         $error = 'Please fill all required fields.';
+    } elseif (mb_strlen($title) > 200) {
+        $error = 'Title cannot exceed 200 characters.';
+    } elseif (mb_strlen($description) < 10) {
+        $error = 'Description must be at least 10 characters.';
     } elseif (!in_array($categoryId, $validCategoryIds)) {
         $error = 'Invalid category selected.';
     } elseif (!$dateValid) {
@@ -108,8 +112,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     addNotif($admin['id'], $reportId, "New report submitted: [{$ticketNo}] {$title} — needs review");
                 }
 
+                // ✅ Clear form after success
                 $success = "✅ Report submitted! Ticket: <strong style='color:var(--cy)'>{$ticketNo}</strong>. <a href='" . BASE_URL . "/user/my-reports.php'>Track it →</a>";
-
+                $title = $description = $incidentDate = '';
+                $extraFields = [];
+                $_POST = [];
             } else {
                 $error = 'Submission failed. Please try again.';
             }
@@ -122,7 +129,7 @@ sidebar('user', 'report');
 ?>
 
 <div class="pg-title">Submit Incident Report</div>
-<div class="pg-sub">Provide all details about the cybersecurity incident. Fields marked * are required.</div>
+<div class="pg-sub">Provide all details about the cybersecurity incident. Fields marked <span style="color:var(--re)">*</span> are required.</div>
 
 <?php if ($success): ?>
     <div class="flash-ok"><?= $success ?></div>
@@ -132,19 +139,23 @@ sidebar('user', 'report');
 <?php endif; ?>
 
 <div class="card">
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" id="reportForm">
         <div class="fg">
-            <label class="fl">Incident Title *</label>
-            <input type="text" name="title" class="fi" placeholder="Brief description of the incident" required
-                value="<?= e($_POST['title'] ?? '') ?>">
+            <label class="fl">Incident Title <span style="color:var(--re)">*</span></label>
+            <input type="text" name="title" id="titleInput" class="fi" placeholder="Brief description of the incident"
+                required maxlength="200" value="<?= e($title) ?>">
+            <div style="font-size:11px;color:var(--mu);margin-top:4px;text-align:right">
+                <span id="titleCount">0</span>/200
+            </div>
         </div>
+
         <div class="grid gr-22">
             <div class="fg">
-                <label class="fl">Category *</label>
+                <label class="fl">Category <span style="color:var(--re)">*</span></label>
                 <select name="category_id" id="categorySelect" class="fi" required>
                     <option value="">Select category</option>
                     <?php foreach ($categories as $cat): ?>
-                        <option value="<?= $cat['id'] ?>" <?= ($_POST['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
+                        <option value="<?= $cat['id'] ?>" <?= ($categoryId ?? 0) == $cat['id'] ? 'selected' : '' ?>>
                             <?= e($cat['name']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -152,92 +163,266 @@ sidebar('user', 'report');
             </div>
 
             <div class="fg">
-                <label class="fl">Incident Date *</label>
+                <label class="fl">Incident Date <span style="color:var(--re)">*</span></label>
                 <input type="date" name="incident_date" class="fi" max="<?= date('Y-m-d') ?>" required
-                    value="<?= e($_POST['incident_date'] ?? date('Y-m-d')) ?>">
+                    value="<?= e($incidentDate ?: date('Y-m-d')) ?>">
             </div>
         </div>
 
         <div id="dynamicFields"></div>
 
         <div class="fg">
-            <label class="fl">Full Incident Description *</label>
-            <textarea name="description" class="fi"
+            <label class="fl">Full Incident Description <span style="color:var(--re)">*</span></label>
+            <textarea name="description" id="descInput" class="fi"
                 placeholder="Describe the whole incident: what happened, how it occurred, who was involved, what was the impact..."
-                required style="min-height:130px"><?= e($_POST['description'] ?? '') ?></textarea>
+                required minlength="10" maxlength="5000" style="min-height:130px"><?= e($description) ?></textarea>
+            <div style="font-size:11px;color:var(--mu);margin-top:4px;display:flex;justify-content:space-between">
+                <span>Minimum 10 characters</span>
+                <span><span id="descCount">0</span>/5000</span>
+            </div>
         </div>
 
         <div class="fg">
             <label class="fl">Evidence File (optional — max 5MB)</label>
-            <input type="file" name="evidence" class="fi" style="padding:8px;cursor:pointer"
+            <input type="file" name="evidence" id="fileInput" class="fi" style="padding:8px;cursor:pointer"
                 accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.doc,.docx">
             <div style="font-size:11px;color:var(--mu);margin-top:4px">
                 Allowed: JPG, PNG, PDF, TXT, DOC, DOCX — Max 5MB
             </div>
+            <div id="filePreview" style="display:none;margin-top:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;font-size:12px;color:var(--cy)">
+                📎 <span id="fileName"></span> <span id="fileSize" style="color:var(--mu)"></span>
+            </div>
         </div>
 
         <div style="display:flex;gap:10px">
-            <button type="submit" class="btn btn-cy">📋 Submit Report</button>
+            <button type="submit" class="btn btn-cy" id="submitBtn">📋 Submit Report</button>
             <a href="<?= BASE_URL ?>/user/dashboard.php" class="btn btn-gy">Cancel</a>
         </div>
     </form>
 </div>
 
 <script>
+    // ============================================================
+    // Category-based dynamic fields
+    // ============================================================
     const categoryFields = {
-        'Bug Report': [
-            { name: 'website_url', label: 'Website / App URL', type: 'text', placeholder: 'e.g., https://example.com/page' },
-            { name: 'browser_device', label: 'Browser & Device', type: 'text', placeholder: 'e.g., Chrome 120 on Windows 11' },
-            { name: 'steps_to_reproduce', label: 'Steps to Reproduce', type: 'textarea', placeholder: '1. Go to page... 2. Click on... 3. Error appears...' },
-            { name: 'expected_result', label: 'Expected Result', type: 'text', placeholder: 'What should have happened?' },
-            { name: 'actual_result', label: 'Actual Result', type: 'text', placeholder: 'What actually happened?' },
+        'Bug Report': [{
+                name: 'website_url',
+                label: 'Website / App URL',
+                type: 'text',
+                placeholder: 'e.g., https://example.com/page'
+            },
+            {
+                name: 'browser_device',
+                label: 'Browser & Device',
+                type: 'text',
+                placeholder: 'e.g., Chrome 120 on Windows 11'
+            },
+            {
+                name: 'steps_to_reproduce',
+                label: 'Steps to Reproduce',
+                type: 'textarea',
+                placeholder: '1. Go to page... 2. Click on... 3. Error appears...'
+            },
+            {
+                name: 'expected_result',
+                label: 'Expected Result',
+                type: 'text',
+                placeholder: 'What should have happened?'
+            },
+            {
+                name: 'actual_result',
+                label: 'Actual Result',
+                type: 'text',
+                placeholder: 'What actually happened?'
+            },
         ],
-        'Cybercrime': [
-            { name: 'suspect_name', label: 'Suspect Name', type: 'text', placeholder: 'Name of the suspect (if known)' },
-            { name: 'suspect_email', label: 'Suspect Email', type: 'email', placeholder: 'email@example.com' },
-            { name: 'suspect_phone', label: 'Suspect Phone', type: 'tel', placeholder: '98XXXXXXXX' },
-            { name: 'suspect_ip', label: 'Suspect IP Address', type: 'text', placeholder: '192.168.1.1' },
-            { name: 'suspect_social', label: 'Social Media Profile', type: 'text', placeholder: 'Facebook/Instagram/Twitter profile link' },
+        'Cybercrime': [{
+                name: 'suspect_name',
+                label: 'Suspect Name',
+                type: 'text',
+                placeholder: 'Name of the suspect (if known)'
+            },
+            {
+                name: 'suspect_email',
+                label: 'Suspect Email',
+                type: 'email',
+                placeholder: 'email@example.com'
+            },
+            {
+                name: 'suspect_phone',
+                label: 'Suspect Phone',
+                type: 'tel',
+                placeholder: '98XXXXXXXX'
+            },
+            {
+                name: 'suspect_ip',
+                label: 'Suspect IP Address',
+                type: 'text',
+                placeholder: '192.168.1.1'
+            },
+            {
+                name: 'suspect_social',
+                label: 'Social Media Profile',
+                type: 'text',
+                placeholder: 'Facebook/Instagram/Twitter profile link'
+            },
         ],
-        'Security Incident': [
-            { name: 'affected_system', label: 'Affected System / Account', type: 'text', placeholder: 'e.g., Gmail account, Server 192.168.1.10' },
-            { name: 'access_method', label: 'How was it accessed?', type: 'text', placeholder: 'Phishing, stolen credentials, brute force, etc.' },
-            { name: 'data_exposed', label: 'What data was exposed?', type: 'text', placeholder: 'Emails, passwords, financial data, etc.' },
-            { name: 'detection_method', label: 'How was it detected?', type: 'text', placeholder: 'User report, system alert, monitoring tool, etc.' },
+        'Security Incident': [{
+                name: 'affected_system',
+                label: 'Affected System / Account',
+                type: 'text',
+                placeholder: 'e.g., Gmail account, Server 192.168.1.10'
+            },
+            {
+                name: 'access_method',
+                label: 'How was it accessed?',
+                type: 'text',
+                placeholder: 'Phishing, stolen credentials, brute force, etc.'
+            },
+            {
+                name: 'data_exposed',
+                label: 'What data was exposed?',
+                type: 'text',
+                placeholder: 'Emails, passwords, financial data, etc.'
+            },
+            {
+                name: 'detection_method',
+                label: 'How was it detected?',
+                type: 'text',
+                placeholder: 'User report, system alert, monitoring tool, etc.'
+            },
         ],
-        'Vulnerability Report': [
-            { name: 'vulnerable_url', label: 'Vulnerable URL / System', type: 'text', placeholder: 'https://example.com/page.php?id=1' },
-            { name: 'vulnerability_type', label: 'Type of Vulnerability', type: 'text', placeholder: 'SQL Injection, XSS, CSRF, IDOR, etc.' },
-            { name: 'impact', label: 'Potential Impact', type: 'text', placeholder: 'What could an attacker do with this vulnerability?' },
-            { name: 'reproduction_steps', label: 'Steps to Reproduce', type: 'textarea', placeholder: 'How can this vulnerability be triggered?' },
+        'Vulnerability Report': [{
+                name: 'vulnerable_url',
+                label: 'Vulnerable URL / System',
+                type: 'text',
+                placeholder: 'https://example.com/page.php?id=1'
+            },
+            {
+                name: 'vulnerability_type',
+                label: 'Type of Vulnerability',
+                type: 'text',
+                placeholder: 'SQL Injection, XSS, CSRF, IDOR, etc.'
+            },
+            {
+                name: 'impact',
+                label: 'Potential Impact',
+                type: 'text',
+                placeholder: 'What could an attacker do with this vulnerability?'
+            },
+            {
+                name: 'reproduction_steps',
+                label: 'Steps to Reproduce',
+                type: 'textarea',
+                placeholder: 'How can this vulnerability be triggered?'
+            },
         ],
-        'Online Fraud': [
-            { name: 'fraud_amount', label: 'Amount Lost (in NPR)', type: 'number', placeholder: 'e.g., 100000' },
-            { name: 'payment_method', label: 'Payment Method', type: 'text', placeholder: 'eSewa, Khalti, Bank Transfer, PayPal, etc.' },
-            { name: 'transaction_id', label: 'Transaction ID', type: 'text', placeholder: 'TRX-123456789' },
-            { name: 'fraud_website', label: 'Fake Website / App', type: 'text', placeholder: 'URL of the fake website or app name' },
-            { name: 'contact_method', label: 'How were you contacted?', type: 'text', placeholder: 'Phone call, SMS, WhatsApp, Facebook message, etc.' },
+        'Online Fraud': [{
+                name: 'fraud_amount',
+                label: 'Amount Lost (in NPR)',
+                type: 'number',
+                placeholder: 'e.g., 100000'
+            },
+            {
+                name: 'payment_method',
+                label: 'Payment Method',
+                type: 'text',
+                placeholder: 'eSewa, Khalti, Bank Transfer, PayPal, etc.'
+            },
+            {
+                name: 'transaction_id',
+                label: 'Transaction ID',
+                type: 'text',
+                placeholder: 'TRX-123456789'
+            },
+            {
+                name: 'fraud_website',
+                label: 'Fake Website / App',
+                type: 'text',
+                placeholder: 'URL of the fake website or app name'
+            },
+            {
+                name: 'contact_method',
+                label: 'How were you contacted?',
+                type: 'text',
+                placeholder: 'Phone call, SMS, WhatsApp, Facebook message, etc.'
+            },
         ],
-        'Social Media Abuse': [
-            { name: 'platform', label: 'Platform', type: 'text', placeholder: 'Facebook, Instagram, TikTok, Twitter, etc.' },
-            { name: 'fake_profile_url', label: 'Fake Profile URL', type: 'text', placeholder: 'https://facebook.com/fakeprofile' },
-            { name: 'fake_username', label: 'Fake Username', type: 'text', placeholder: 'Username of the fake account' },
-            { name: 'abuse_type', label: 'Type of Abuse', type: 'text', placeholder: 'Harassment, Impersonation, Cyberbullying, Defamation, etc.' },
-            { name: 'evidence_links', label: 'Evidence Links (screenshots, posts)', type: 'textarea', placeholder: 'Share links or describe the evidence available' },
+        'Social Media Abuse': [{
+                name: 'platform',
+                label: 'Platform',
+                type: 'text',
+                placeholder: 'Facebook, Instagram, TikTok, Twitter, etc.'
+            },
+            {
+                name: 'fake_profile_url',
+                label: 'Fake Profile URL',
+                type: 'text',
+                placeholder: 'https://facebook.com/fakeprofile'
+            },
+            {
+                name: 'fake_username',
+                label: 'Fake Username',
+                type: 'text',
+                placeholder: 'Username of the fake account'
+            },
+            {
+                name: 'abuse_type',
+                label: 'Type of Abuse',
+                type: 'text',
+                placeholder: 'Harassment, Impersonation, Cyberbullying, Defamation, etc.'
+            },
+            {
+                name: 'evidence_links',
+                label: 'Evidence Links (screenshots, posts)',
+                type: 'textarea',
+                placeholder: 'Share links or describe the evidence available'
+            },
         ],
-        'Ransomware': [
-            { name: 'ransom_amount', label: 'Ransom Amount Demanded', type: 'text', placeholder: 'e.g., $500 USD or 0.5 BTC' },
-            { name: 'payment_method', label: 'Payment Method Requested', type: 'text', placeholder: 'Bitcoin, eSewa, Bank Transfer, etc.' },
-            { name: 'attacker_contact', label: 'Attacker Contact', type: 'text', placeholder: 'Email, Telegram, WhatsApp number, etc.' },
-            { name: 'encrypted_files', label: 'Affected Files / Systems', type: 'text', placeholder: 'What files or systems were encrypted?' },
-            { name: 'ransom_note', label: 'Ransom Note Content', type: 'textarea', placeholder: 'What did the ransom note say?' },
+        'Ransomware': [{
+                name: 'ransom_amount',
+                label: 'Ransom Amount Demanded',
+                type: 'text',
+                placeholder: 'e.g., $500 USD or 0.5 BTC'
+            },
+            {
+                name: 'payment_method',
+                label: 'Payment Method Requested',
+                type: 'text',
+                placeholder: 'Bitcoin, eSewa, Bank Transfer, etc.'
+            },
+            {
+                name: 'attacker_contact',
+                label: 'Attacker Contact',
+                type: 'text',
+                placeholder: 'Email, Telegram, WhatsApp number, etc.'
+            },
+            {
+                name: 'encrypted_files',
+                label: 'Affected Files / Systems',
+                type: 'text',
+                placeholder: 'What files or systems were encrypted?'
+            },
+            {
+                name: 'ransom_note',
+                label: 'Ransom Note Content',
+                type: 'textarea',
+                placeholder: 'What did the ransom note say?'
+            },
         ],
-        'Other': [
-            { name: 'additional_info', label: 'Additional Information', type: 'textarea', placeholder: 'Any other relevant details...' },
-        ]
+        'Other': [{
+            name: 'additional_info',
+            label: 'Additional Information',
+            type: 'textarea',
+            placeholder: 'Any other relevant details...'
+        }, ]
     };
 
-    function updateFields() {
+    // Previous values from POST — so we can restore them on error
+    const previousValues = <?= json_encode($extraFields, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+    function updateFields(preserveValues = false) {
         const select = document.getElementById('categorySelect');
         const selectedOption = select.options[select.selectedIndex];
         const categoryName = selectedOption ? selectedOption.text : null;
@@ -261,18 +446,21 @@ sidebar('user', 'report');
                         <div class="gr-22">`;
 
         fields.forEach(field => {
+            const prevVal = (preserveValues && previousValues[field.name]) ? previousValues[field.name] : '';
+            const safeVal = String(prevVal).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
             if (field.type === 'textarea') {
                 html += `
                     <div class="fg" style="grid-column: span 2;">
                         <label class="fl">${field.label}</label>
-                        <textarea name="extra[${field.name}]" class="fi" placeholder="${field.placeholder}" style="min-height:70px"></textarea>
+                        <textarea name="extra[${field.name}]" class="fi" placeholder="${field.placeholder}" style="min-height:70px">${safeVal}</textarea>
                     </div>
                 `;
             } else {
                 html += `
                     <div class="fg">
                         <label class="fl">${field.label}</label>
-                        <input type="${field.type}" name="extra[${field.name}]" class="fi" placeholder="${field.placeholder}">
+                        <input type="${field.type}" name="extra[${field.name}]" class="fi" placeholder="${field.placeholder}" value="${safeVal}">
                     </div>
                 `;
             }
@@ -282,8 +470,55 @@ sidebar('user', 'report');
         container.innerHTML = html;
     }
 
-    document.getElementById('categorySelect').addEventListener('change', updateFields);
-    updateFields();
+    // Initialize with values from a failed POST (if any)
+    document.getElementById('categorySelect').addEventListener('change', () => updateFields(false));
+    updateFields(true);
+
+    // ============================================================
+    // Character counters
+    // ============================================================
+    const titleInput = document.getElementById('titleInput');
+    const titleCount = document.getElementById('titleCount');
+    const descInput = document.getElementById('descInput');
+    const descCount = document.getElementById('descCount');
+
+    function updateCounts() {
+        titleCount.textContent = titleInput.value.length;
+        descCount.textContent = descInput.value.length;
+    }
+    titleInput.addEventListener('input', updateCounts);
+    descInput.addEventListener('input', updateCounts);
+    updateCounts();
+
+    // ============================================================
+    // File preview (name + size)
+    // ============================================================
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+
+    fileInput.addEventListener('change', () => {
+        const f = fileInput.files[0];
+        if (!f) {
+            filePreview.style.display = 'none';
+            return;
+        }
+        const kb = (f.size / 1024).toFixed(1);
+        fileName.textContent = f.name;
+        fileSize.textContent = `(${kb} KB)`;
+        filePreview.style.display = 'block';
+    });
+
+    // ============================================================
+    // Prevent double-submit
+    // ============================================================
+    const form = document.getElementById('reportForm');
+    const submitBtn = document.getElementById('submitBtn');
+    form.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Submitting...';
+    });
 </script>
 
 <?php pageEnd(); ?>
