@@ -18,16 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$name || !$email || !$uname || !$pw || !$phone) {
         $err = 'All required fields must be filled out.';
-    } elseif (strlen($name) < 3 || !preg_match('/^[A-Za-z ]+$/', $name)) {
+    } elseif (strlen($name) < 3 || !preg_match('/^[A-Za-z_ ]+$/', $name)) {
         $err = 'Full name must contain at least 3 letters (only letters and spaces).';
-    } elseif (!preg_match('/^[A-Za-z0-9_]{3,20}$/', $uname)) {
-        $err = 'Username must be 3–20 characters and contain only letters, numbers, and underscores.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $err = 'Please enter a valid email address.';
+    } elseif (!preg_match('/^[A-Za-z]{3,20}$/', $uname)) {
+        $err = 'Username must be 3–20 characters and contain only letters.';
+    } elseif (!preg_match('/^[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}$/', $email)) {
+        $err = 'Email must be like User123@gmail.com';
     } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
         $err = 'Phone number must be exactly 10 digits.';
     } elseif (strlen($pw) < 8) {
         $err = 'Password must be at least 8 characters.';
+    } elseif (!preg_match('/[A-Z]/', $pw) || !preg_match('/[a-z]/', $pw) || !preg_match('/[0-9]/', $pw) || !preg_match('/[^a-zA-Z0-9]/', $pw)) {
+        $err = 'Password must contain uppercase, lowercase, number, and a symbol.';
     } elseif ($pw !== $pw2) {
         $err = 'Passwords do not match.';
     } elseif (!isset($_POST['agree'])) {
@@ -194,19 +196,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block
         }
 
+        /* RED for invalid */
         .input-hint.error {
             color: var(--re)
         }
 
+        /* GREEN for valid */
         .input-hint.success {
             color: var(--gr)
         }
 
+        /* RED border for invalid */
         .form-group.error input {
             border-color: var(--re) !important;
             box-shadow: 0 0 0 3px rgba(248, 81, 73, .15) !important
         }
 
+        /* GREEN border for valid */
         .form-group.success input {
             border-color: var(--gr) !important;
             box-shadow: 0 0 0 3px rgba(63, 185, 80, .15) !important
@@ -230,30 +236,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="alert-error" style="padding: 0.5rem; margin-bottom: 0.75rem;"><span><?= e($err) ?></span></div><?php endif; ?>
         <form method="POST" id="regForm" novalidate>
             <div class="form-grid">
-                <div class="form-group"><label for="full_name">Full Name *</label><input type="text" id="full_name"
-                        name="full_name" placeholder="John Doe" required value="<?= e($_POST['full_name'] ?? '') ?>">
+                <div class="form-group"><label for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="bishwas acahrya" required 
+                           pattern="[A-Za-z_ ]{3,}"
+                           value="<?= e($_POST['full_name'] ?? '') ?>">
                     <div class="input-hint" id="name-hint">Letters & spaces only.</div>
                 </div>
-                <div class="form-group"><label for="phone">Phone Number *</label><input type="tel" id="phone"
-                        name="phone" placeholder="10-digit number" maxlength="10" required
-                        value="<?= e($_POST['phone'] ?? '') ?>">
+                <div class="form-group"><label for="phone">Phone Number *</label>
+                    <input type="text" inputmode="numeric" id="phone" name="phone" placeholder="10-digit number" maxlength="10" required
+                           pattern="[0-9]{10}"
+                           value="<?= e($_POST['phone'] ?? '') ?>">
                     <div class="input-hint" id="phone-hint">10 digits required.</div>
                 </div>
-                <div class="form-group full-width"><label for="email">Email Address *</label><input type="email"
-                        id="email" name="email" placeholder="name@domain.com" required
-                        value="<?= e($_POST['email'] ?? '') ?>">
-                    <div class="input-hint" id="email-hint">Valid email required.</div>
+                <div class="form-group full-width"><label for="email">Email Address *</label>
+                    <input type="text" inputmode="email" id="email" name="email" placeholder="User123@gmail.com" required
+                           pattern="[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}"
+                           value="<?= e($_POST['email'] ?? '') ?>">
+                    <div class="input-hint" id="email-hint">Valid email required</div>
                 </div>
-                <div class="form-group full-width"><label for="username">Username *</label><input type="text"
-                        id="username" name="username" placeholder="Choose a unique handle" required
-                        value="<?= e($_POST['username'] ?? '') ?>">
-                    <div class="input-hint" id="user-hint">3–20 chars (letters, numbers, _).</div>
+                <div class="form-group full-width"><label for="username">Username *</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a unique handle" required
+                           pattern="[A-Za-z]{3,20}"
+                           value="<?= e($_POST['username'] ?? '') ?>">
+                    <div class="input-hint" id="user-hint">Letters only, 3–20 characters.</div>
                 </div>
+                
                 <div class="form-group password-group">
                     <label for="password">Password *</label>
-                    <input type="password" id="password" name="password" placeholder="Min. 8 characters" required>
+                    <input type="password" id="password" name="password" placeholder="Min. 8 chars" required
+                           pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}">
                     <button type="button" id="togglePassword" aria-label="Toggle password visibility">👁️</button>
-                    <div class="input-hint" id="pw-hint">Min. 8 characters.</div>
+                    <div class="input-hint" id="pw-hint">Min. 8 chars, uppercase, lowercase, number & symbol.</div>
                 </div>
                 <div class="form-group"><label for="confirm_password">Confirm Password *</label><input type="password"
                         id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
@@ -275,7 +288,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-footer">Already registered? <a href="<?= BASE_URL ?>/login.php">Sign in here</a></div>
     </div>
     <script>
-        // --- Clean hints (show on focus/error), real-time validation, password toggle ---
         document.querySelectorAll('.form-group input:not([type="checkbox"])').forEach(inp => {
             const grp = inp.closest('.form-group'), hint = grp?.querySelector('.input-hint');
             inp.addEventListener('focus', () => hint?.classList.add('visible'));
