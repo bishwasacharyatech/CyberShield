@@ -228,4 +228,8 @@ sidebar('analyst', 'assigned');
     </div>
 </div>
 
+<div style="text-align:center;margin-top:20px">
+    <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" class="btn btn-gr">⬇ Download Report as pdf</a>
+</div>
+
 <?php pageEnd(); ?>
