@@ -119,22 +119,42 @@ sidebar('user', 'my-reports');
         <div class="ch"><span class="ct">⏳ Timeline</span></div>
         <?php
         $timelineColors = [
-            'Submitted' => '#00d4ff', 'Assigned' => '#8b5cf6', 'Under Review' => '#f59e0b',
-            'In Progress' => '#f97316', 'Resolved' => '#00e676', 'Closed' => '#64748b'
+            'Submitted'    => '#00d4ff',
+            'Assigned'     => '#8b5cf6',
+            'Under Review' => '#f59e0b',
+            'In Progress'  => '#f97316',
+            'Resolved'     => '#00e676',
+            'Closed'       => '#64748b',
+            'Updated'      => '#f472b6',
         ];
+        $total = count($timeline);
         ?>
-        <?php foreach ($timeline as $event): ?>
-            <?php $color = $timelineColors[$event['action']] ?? '#4a6a88'; ?>
-            <div class="tl-item">
-                <div class="tl-dot" style="background:<?= $color ?>18;color:<?= $color ?>;border:2px solid <?= $color ?>44;font-size:10px">●</div>
+        <?php foreach ($timeline as $i => $event): ?>
+            <?php
+            $color = $timelineColors[$event['action']] ?? '#4a6a88';
+            $isCurrent = ($event['action'] == $report['status']);
+            ?>
+            <div style="display:flex;gap:10px;padding:6px 0;align-items:flex-start">
+                <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                            background:<?= $color ?>18;color:<?= $color ?>;border:2px solid <?= $color ?>44;font-size:10px">
+                    <?= $isCurrent ? '●' : '○' ?>
+                </div>
                 <div style="flex:1">
-                    <div style="font-weight:600;font-size:13px;color:var(--wh)"><?= e($event['action']) ?></div>
+                    <div style="font-weight:600;font-size:13px;color:var(--wh)">
+                        <?= e($event['action']) ?>
+                        <?php if ($isCurrent): ?>
+                            <span style="font-size:10px;color:var(--gr);font-weight:400;margin-left:6px">← Current</span>
+                        <?php endif; ?>
+                    </div>
                     <div style="font-size:11px;color:var(--mu);font-family:monospace"><?= e($event['created_at']) ?></div>
                     <?php if ($event['note']): ?>
-                        <div style="font-size:12px;margin-top:2px"><?= e($event['note']) ?></div>
+                        <div style="font-size:12px;margin-top:4px;color:var(--tx);white-space:pre-wrap"><?= nl2br(e($event['note'])) ?></div>
                     <?php endif; ?>
                 </div>
             </div>
+            <?php if ($i < $total - 1): ?>
+                <div style="padding-left:9px;color:var(--mu);font-size:14px;line-height:1;opacity:0.6">↓</div>
+            <?php endif; ?>
         <?php endforeach; ?>
         <?php if (!$timeline): ?>
             <div style="color:var(--mu);font-size:12px">No timeline yet</div>
