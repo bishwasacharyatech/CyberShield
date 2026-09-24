@@ -1,11 +1,4 @@
 /* ============================================================
-   CYBERSHIELD – MASTER STYLESHEET
-   ============================================================
-   All pages: landing, login, register, terms, admin/*,
-   analyst/*, user/*
-   ============================================================ */
-
-/* ============================================================
    SECTION 0 – GLOBAL RESET & VARIABLES
    ============================================================ */
 * {
@@ -483,6 +476,18 @@ input:focus {
     font-size: 13px;
 }
 
+.terms-header .badge {
+    display: inline-block;
+    background: #58a6ff18;
+    color: var(--cy);
+    padding: 2px 14px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #58a6ff33;
+    margin-top: 8px;
+}
+
 .term-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -505,9 +510,15 @@ input:focus {
     gap: 8px;
 }
 
+.term-section h2 .num {
+    color: var(--cy);
+    font-size: 12px;
+    opacity: 0.6;
+}
+
 .term-section p {
     font-size: 13px;
-    color: var(--tx);
+    color: var(--text);
     line-height: 1.7;
     margin-bottom: 6px;
 }
@@ -519,9 +530,13 @@ input:focus {
 
 .term-section ul li {
     font-size: 13px;
-    color: var(--tx);
+    color: var(--text);
     line-height: 1.6;
     margin-bottom: 3px;
+}
+
+.term-section ul li strong {
+    color: var(--wh);
 }
 
 .back-btn {
@@ -530,7 +545,7 @@ input:focus {
     gap: 6px;
     padding: 10px 24px;
     background: var(--bg3);
-    color: var(--tx);
+    color: var(--text);
     border: 1px solid var(--bd);
     border-radius: 6px;
     font-size: 13px;
@@ -543,6 +558,22 @@ input:focus {
 .back-btn:hover {
     background: var(--bd);
     color: var(--wh);
+}
+
+.terms-footer {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bd);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.terms-footer .version {
+    font-size: 12px;
+    color: var(--mu);
 }
 
 /* ============================================================
@@ -577,9 +608,9 @@ input:focus {
     font-size: 0.65rem;
     font-weight: 700;
     font-family: monospace;
-    background: var(--re)18;
+    background: #f8514918;
     color: var(--re);
-    border: 1px solid var(--re)33;
+    border: 1px solid #f8514933;
 }
 
 .dot {
@@ -721,7 +752,7 @@ input:focus {
 
 .card:hover {
     border-color: var(--cy);
-    box-shadow: 0 0 0 1px var(--cy)18, 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 1px #58a6ff18, 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .ch {
@@ -780,7 +811,7 @@ input:focus {
 .metric:hover {
     transform: translateY(-2px);
     border-color: var(--cy);
-    box-shadow: 0 0 0 1px var(--cy)18;
+    box-shadow: 0 0 0 1px #58a6ff18;
 }
 
 .m-lbl {
@@ -861,21 +892,21 @@ input:focus {
 }
 
 .btn-re {
-    background: var(--re)18;
+    background: #f8514918;
     color: var(--re);
-    border: 1px solid var(--re)33;
+    border: 1px solid #f8514933;
 }
 
 .btn-gr {
-    background: var(--gr)12;
+    background: #3fb95012;
     color: var(--gr);
-    border: 1px solid var(--gr)25;
+    border: 1px solid #3fb95025;
 }
 
 .btn-pu {
-    background: var(--pu)12;
+    background: #bc8cff12;
     color: var(--pu);
-    border: 1px solid var(--pu)25;
+    border: 1px solid #bc8cff25;
 }
 
 /* ============================================================
@@ -921,8 +952,8 @@ textarea.fi {
    SECTION 9 – FLASH MESSAGES
    ============================================================ */
 .flash-ok {
-    background: var(--gr)08;
-    border: 1px solid var(--gr)25;
+    background: #3fb95008;
+    border: 1px solid #3fb95025;
     border-radius: 6px;
     padding: 10px 14px;
     margin-bottom: 12px;
@@ -931,8 +962,8 @@ textarea.fi {
 }
 
 .flash-er {
-    background: var(--re)08;
-    border: 1px solid var(--re)25;
+    background: #f8514908;
+    border: 1px solid #f8514925;
     border-radius: 6px;
     padding: 10px 14px;
     margin-bottom: 12px;
@@ -1283,6 +1314,19 @@ table tr:hover td {
     .container {
         padding: 16px;
         margin: 12px;
+    }
+
+    .terms-header {
+        padding: 18px 16px;
+    }
+
+    .terms-header h1 {
+        font-size: 20px;
+    }
+
+    .terms-footer {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
