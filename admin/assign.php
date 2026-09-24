@@ -273,6 +273,6 @@ sidebar('admin', 'assign');
     </form>
 </div>
 <div style="text-align:center;margin-top:20px">
-    <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" target="_blank" class="btn btn-gr">📄 View / Print Report</a>
+    <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" class="btn btn-gr">📄 View / Print Report</a>
 </div>
 <?php pageEnd(); ?>
