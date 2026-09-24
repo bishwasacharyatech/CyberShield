@@ -12,6 +12,10 @@ $stmt->bind_param('i', $uid);
 $stmt->execute();
 $existingRequest = $stmt->get_result()->fetch_assoc();
 
+if ($existingRequest && $existingRequest['status'] === 'approved' && $_SESSION['role'] === 'user') {
+    $_SESSION['role'] = 'analyst';
+}
+
 $canApply = !$existingRequest || $existingRequest['status'] === 'rejected';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canApply) {
@@ -49,7 +53,9 @@ sidebar('user', 'apply-analyst');
 <?php endif; ?>
 
 <div class="card" style="max-width:560px; margin: 0 auto;">
+
     <?php if ($existingRequest && $existingRequest['status'] === 'pending'): ?>
+
         <div class="ch"><span class="ct">⏳ Request Pending</span></div>
         <p style="color:var(--mu);font-size:13px;line-height:1.7">
             Your application is awaiting admin review. You'll be notified once a decision is made.
@@ -58,7 +64,32 @@ sidebar('user', 'apply-analyst');
             <div style="font-size:11px;color:var(--mu);margin-bottom:6px;text-transform:uppercase">Submitted</div>
             <div style="font-size:12px;color:var(--mu)"><?= e(substr($existingRequest['created_at'], 0, 16)) ?></div>
         </div>
+
+    <?php elseif ($existingRequest && $existingRequest['status'] === 'approved'): ?>
+
+        <div class="ch"><span class="ct">✅ Application Approved</span></div>
+        <div style="text-align:center;padding:14px 0 6px">
+            <div style="font-size:52px;line-height:1;margin-bottom:10px">🎉</div>
+            <div style="font-size:15px;color:var(--gr);font-weight:700;margin-bottom:8px">
+                You are now a SOC Analyst!
+            </div>
+            <p style="color:var(--mu);font-size:13px;line-height:1.7;max-width:420px;margin:0 auto">
+                Your application has been approved by an administrator. You now have analyst access
+                and can investigate assigned cases.
+            </p>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bd)">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mu);padding:4px 0">
+                <span style="text-transform:uppercase;font-size:11px">Approved On</span>
+                <span><?= e(substr($existingRequest['reviewed_at'] ?? $existingRequest['created_at'], 0, 16)) ?></span>
+            </div>
+        </div>
+        <div style="margin-top:16px;text-align:center">
+            <a href="<?= BASE_URL ?>/analyst/dashboard.php" class="btn btn-cy">→ Go to Analyst Dashboard</a>
+        </div>
+
     <?php else: ?>
+
         <?php if ($existingRequest && $existingRequest['status'] === 'rejected'): ?>
             <div class="ch"><span class="ct">✖ Previous Request Rejected</span></div>
             <p style="color:var(--mu);font-size:13px;line-height:1.7;margin-bottom:16px">
@@ -76,7 +107,9 @@ sidebar('user', 'apply-analyst');
             </div>
             <button type="submit" class="btn btn-cy">📨 Submit Request</button>
         </form>
+
     <?php endif; ?>
+
 </div>
 
 <?php pageEnd(); ?>
