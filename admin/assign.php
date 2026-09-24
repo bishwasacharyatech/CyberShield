@@ -8,6 +8,8 @@ $id = (int) ($_GET['id'] ?? 0);
 $msg = '';
 $err = '';
 
+$validSeverities = ['Critical', 'High', 'Medium', 'Low'];
+
 $stmt = $db->prepare("
     SELECT r.*, c.name AS cat_name, u.full_name AS uname
     FROM reports r
@@ -48,73 +50,55 @@ $analysts = $db->query("
     WHERE role = 'analyst' AND status = 'active'
 ")->fetch_all(MYSQLI_ASSOC);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $analystId = (int) ($_POST['analyst_id'] ?? 0);
-    $severity  = $_POST['severity'] ?? '';
-    $status    = $_POST['status'] ?? '';
-    $analystRemarks = trim($_POST['analyst_remarks'] ?? '');
+$isAssigned = !empty($report['assigned_to']);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isAssigned) {
+    $analystId  = (int) ($_POST['analyst_id'] ?? 0);
+    $severity   = $_POST['severity'] ?? $report['severity'];
+    $adminNote  = trim($_POST['admin_remarks'] ?? '');
     $validAnalystIds = array_column($analysts, 'id');
-    $validSeverities = ['Critical', 'High', 'Medium', 'Low'];
-    $validStatuses   = ['New', 'Assigned', 'Under Review', 'In Progress', 'Resolved', 'Closed'];
 
-    if ($analystId && !in_array($analystId, $validAnalystIds)) {
-        $err = 'Invalid analyst selected.';
-    } elseif (!in_array($severity, $validSeverities) || !in_array($status, $validStatuses)) {
-        $err = 'Invalid severity or status.';
+    if (!in_array($severity, $validSeverities, true)) {
+        $severity = $report['severity'];
+    }
+
+    if (!$analystId || !in_array($analystId, $validAnalystIds)) {
+        $err = 'Please select a valid analyst.';
     } else {
-        $assignedTo = $analystId ?: null;
+        $oldSeverity = $report['severity'];
 
-        $stmt = $db->prepare('UPDATE reports SET assigned_to = ?, severity = ?, status = ?, analyst_remarks = ?, updated_at = NOW() WHERE id = ?');
-        $stmt->bind_param('isssi', $assignedTo, $severity, $status, $analystRemarks, $id);
-        $stmt->execute();
+        $upd = $db->prepare("UPDATE reports SET assigned_to = ?, status = 'Assigned', severity = ?, analyst_remarks = ?, updated_at = NOW() WHERE id = ?");
+        $upd->bind_param('issi', $analystId, $severity, $adminNote, $id);
+        $upd->execute();
 
-        // Log assignment if analyst changed
-        if ($analystId && $report['assigned_to'] != $analystId) {
-            $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
-            $adminId = $_SESSION['uid'];
-            $action = 'Assigned';
-            $note = "Assigned by Admin to Analyst ID $analystId";
-            $timeline->bind_param('iiss', $id, $adminId, $action, $note);
-            $timeline->execute();
-
-            addNotif($report['user_id'], $id, "Your report [{$report['ticket_no']}] has been assigned to an analyst.");
-            addNotif($analystId, $id, "You have been assigned a new case: [{$report['ticket_no']}] {$report['title']}");
+        $adminId = $_SESSION['uid'];
+        $action = 'Assigned';
+        $note = $adminNote !== '' ? $adminNote : "Assigned to analyst";
+        if ($severity !== $oldSeverity) {
+            $note .= "\nSeverity changed: {$oldSeverity} → {$severity}";
         }
 
-        // Log status/severity changes
-        if ($status != $report['status'] || $severity != $report['severity']) {
-            $timeline = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
-            $adminId = $_SESSION['uid'];
-            $action = 'Updated';
-            $note = "Status: {$report['status']} → {$status}, Severity: {$report['severity']} → {$severity}";
-            $timeline->bind_param('iiss', $id, $adminId, $action, $note);
-            $timeline->execute();
-        }
+        $timelineInsert = $db->prepare('INSERT INTO report_timeline (report_id, user_id, action, note) VALUES (?, ?, ?, ?)');
+        $timelineInsert->bind_param('iiss', $id, $adminId, $action, $note);
+        $timelineInsert->execute();
 
-        $msg = 'Report updated!';
+        addNotif($report['user_id'], $id, "Your report [{$report['ticket_no']}] has been assigned to an analyst.");
+        addNotif($analystId, $id, "You have been assigned a new case: [{$report['ticket_no']}] {$report['title']}");
 
-        // Refresh report data
-        $stmt = $db->prepare("
-            SELECT r.*, c.name AS cat_name, u.full_name AS uname
-            FROM reports r
-            LEFT JOIN categories c ON r.category_id = c.id
-            LEFT JOIN users u ON r.user_id = u.id
-            WHERE r.id = ?
-        ");
-        $stmt->bind_param('i', $id);
+        // Audit log for assignment (was previously missing)
+        auditLog(
+            'ASSIGN',
+            'Report',
+            "Assigned #{$report['ticket_no']} to analyst ID {$analystId}" .
+            ($severity !== $oldSeverity ? " (severity: {$oldSeverity} → {$severity})" : '')
+        );
+
+        $msg = 'Report assigned!';
+
         $stmt->execute();
         $report = $stmt->get_result()->fetch_assoc();
+        $isAssigned = !empty($report['assigned_to']);
 
-        // Refresh timeline
-        $timelineStmt = $db->prepare("
-            SELECT t.*, u.full_name AS un
-            FROM report_timeline t
-            LEFT JOIN users u ON t.user_id = u.id
-            WHERE t.report_id = ?
-            ORDER BY t.id ASC
-        ");
-        $timelineStmt->bind_param('i', $id);
         $timelineStmt->execute();
         $timeline = $timelineStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
@@ -203,75 +187,105 @@ sidebar('admin', 'assign');
         <span class="ct">⏳ Investigation Timeline</span>
         <span style="font-size:11px;color:var(--mu)"><?= count($timeline) ?> events</span>
     </div>
-    <?php if ($timeline): ?>
-        <div style="position:relative;padding-left:24px">
-            <div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--bd)"></div>
-            <?php foreach ($timeline as $event): ?>
-                <?php
-                $colors = [
-                    'Submitted' => '#00d4ff', 'Assigned' => '#8b5cf6',
-                    'Under Review' => '#f59e0b', 'In Progress' => '#f97316',
-                    'Resolved' => '#00e676', 'Closed' => '#64748b', 'Updated' => '#f472b6'
-                ];
-                $color = $colors[$event['action']] ?? '#4a6a88';
-                ?>
-                <div style="position:relative;padding-bottom:16px;padding-left:16px;border-left:2px solid <?= $color ?>33">
-                    <div style="position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:<?= $color ?>;border:2px solid var(--bg2)"></div>
-                    <div style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline">
-                        <span style="font-weight:600;font-size:14px;color:var(--wh)"><?= e($event['action']) ?></span>
-                        <span style="font-size:12px;color:var(--mu);font-family:monospace"><?= e($event['created_at']) ?></span>
-                        <?php if ($event['un']): ?>
-                            <span style="font-size:12px;color:var(--cy)">— <?= e($event['un']) ?></span>
-                        <?php endif; ?>
-                    </div>
-                    <?php if ($event['note']): ?>
-                        <div style="font-size:12px;color:var(--mu);margin-top:2px"><?= e($event['note']) ?></div>
+    <?php
+    $timelineColors = [
+        'Submitted'    => '#00d4ff',
+        'Assigned'     => '#8b5cf6',
+        'Under Review' => '#f59e0b',
+        'In Progress'  => '#f97316',
+        'Resolved'     => '#00e676',
+        'Closed'       => '#64748b',
+        'Updated'      => '#f472b6',
+    ];
+    $total = count($timeline);
+    ?>
+    <?php foreach ($timeline as $i => $event): ?>
+        <?php
+        $color = $timelineColors[$event['action']] ?? '#4a6a88';
+        $isCurrent = ($event['action'] == $report['status']);
+        ?>
+        <div style="display:flex;gap:10px;padding:6px 0;align-items:flex-start">
+            <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                        background:<?= $color ?>18;color:<?= $color ?>;border:2px solid <?= $color ?>44;font-size:10px">
+                <?= $isCurrent ? '●' : '○' ?>
+            </div>
+            <div style="flex:1">
+                <div style="font-weight:600;font-size:14px;color:var(--wh)">
+                    <?= e($event['action']) ?>
+                    <?php if ($isCurrent): ?>
+                        <span style="font-size:10px;color:var(--gr);font-weight:400;margin-left:6px">← Current</span>
+                    <?php endif; ?>
+                    <?php if ($event['un']): ?>
+                        <span style="font-size:12px;color:var(--cy);font-weight:400;margin-left:6px">— <?= e($event['un']) ?></span>
                     <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
+                <div style="font-size:12px;color:var(--mu);font-family:monospace"><?= e($event['created_at']) ?></div>
+                <?php if ($event['note']): ?>
+                    <div style="font-size:12px;color:var(--mu);margin-top:4px;white-space:pre-wrap"><?= nl2br(e($event['note'])) ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-    <?php else: ?>
+        <?php if ($i < $total - 1): ?>
+            <div style="padding-left:9px;color:var(--mu);font-size:14px;line-height:1;opacity:0.6">↓</div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php if (!$timeline): ?>
         <div style="color:var(--mu);font-size:13px;padding:8px 0">No timeline events yet.</div>
     <?php endif; ?>
 </div>
 
-<div class="card">
-    <div class="ch"><span class="ct">✅ Assign & Update</span></div>
-    <form method="POST" style="max-width:480px">
-        <div class="fg">
-            <label class="fl">Assign To Analyst</label>
-            <select name="analyst_id" class="fi">
-                <option value="0">-- Unassigned --</option>
-                <?php foreach ($analysts as $analyst): ?>
-                    <option value="<?= $analyst['id'] ?>" <?= $report['assigned_to'] == $analyst['id'] ? 'selected' : '' ?>>
-                        <?= e($analyst['full_name']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+<?php if (!$isAssigned): ?>
+    <div class="card">
+        <div class="ch"><span class="ct">✅ Assign to Analyst</span></div>
+        <form method="POST" style="max-width:480px">
+            <div class="fg">
+                <label class="fl">Select Analyst</label>
+                <select name="analyst_id" class="fi" required>
+                    <option value="">-- Choose an analyst --</option>
+                    <?php foreach ($analysts as $analyst): ?>
+                        <option value="<?= $analyst['id'] ?>"><?= e($analyst['full_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="fg">
+                <label class="fl">Severity</label>
+                <select name="severity" class="fi" required>
+                    <?php foreach ($validSeverities as $sev): ?>
+                        <option value="<?= $sev ?>" <?= $report['severity'] === $sev ? 'selected' : '' ?>>
+                            <?= $sev ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <div style="font-size:11px;color:var(--mu);margin-top:4px">
+                    Triage priority — Critical / High / Medium / Low.
+                    <?php if (!empty($report['severity'])): ?>
+                        Currently: <strong style="color:var(--am)"><?= e($report['severity']) ?></strong>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="fg">
+                <label class="fl">Assignment Remarks</label>
+                <textarea name="admin_remarks" class="fi" style="min-height:100px"
+                          placeholder="Add a note for the analyst..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-cy">💾 Save Assignment</button>
+        </form>
+    </div>
+<?php else: ?>
+    <div class="card">
+        <div class="ch"><span class="ct">✅ Assignment Locked</span></div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.7">
+            This report has been assigned to
+            <strong style="color:var(--wh)"><?= e($assignedName) ?></strong>
+            with severity
+            <?= sevBadge($report['severity']) ?>.
+            Further updates can only be made by the assigned analyst.
         </div>
-        <div class="fg">
-            <label class="fl">Severity</label>
-            <select name="severity" class="fi">
-                <?php foreach (['Critical', 'High', 'Medium', 'Low'] as $s): ?>
-                    <option <?= $report['severity'] === $s ? 'selected' : '' ?>><?= $s ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="fg">
-            <label class="fl">Status</label>
-            <select name="status" class="fi">
-                <?php foreach (['New', 'Assigned', 'Under Review', 'In Progress', 'Resolved', 'Closed'] as $s): ?>
-                    <option <?= $report['status'] === $s ? 'selected' : '' ?>><?= $s ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="fg">
-            <label class="fl">Analyst Remarks</label>
-            <textarea name="analyst_remarks" class="fi" style="min-height:100px" placeholder="Add remarks for the analyst or update investigation notes..."><?= e($report['analyst_remarks'] ?? '') ?></textarea>
-        </div>
-        <button type="submit" class="btn btn-cy">💾 Save Changes</button>
-    </form>
-</div>
+    </div>
+<?php endif; ?>
+
 <div style="text-align:center;margin-top:20px">
     <a href="<?= BASE_URL ?>/export-single-report.php?id=<?= $id ?>" class="btn btn-gr">📄 View / Print Report</a>
 </div>
